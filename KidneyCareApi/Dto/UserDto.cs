@@ -8,6 +8,7 @@
  * ************************************************************************************************/
 
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 
 namespace KidneyCareApi.Dto
@@ -420,6 +421,85 @@ namespace KidneyCareApi.Dto
         [Description("无")]
         None = 0,
     }
+
+    public enum ReportType
+    {
+        /// <summary>
+        /// 空腹血糖
+        /// </summary>
+        [Description("血常规")]
+        RoutinebBlood = 1,
+
+        /// <summary>
+        ///     尿常规
+        /// </summary>
+        [Description("尿常规")]
+        RoutineUrine = 2,
+
+        /// <summary>
+        ///     泌尿系统彩超
+        /// </summary>
+        [Description("泌尿系统彩超")]
+        UrinarySystemColorDopplerUltrasonography = 3,
+
+        /// <summary>
+        ///     尿蛋白定量检查
+        /// </summary>
+        [Description("尿蛋白定量检查")]
+        UrineProteinCheck = 4,
+
+        /// <summary>
+        ///     生化
+        /// </summary>
+        [Description("生化")]
+        Biochemical = 5,
+
+
+
+        /// <summary>
+        ///     肾活检
+        /// </summary>
+        [Description("肾活检")]
+        RenalBiopsy = 6,
+        /// <summary>
+        ///     甲状旁腺激素(PTH)
+        /// </summary>
+        [Description("甲状旁腺激素(PTH)")]
+        PTH = 7,
+        /// <summary>
+        ///     铁代谢
+        /// </summary>
+        [Description("铁代谢")]
+        IronMetabolism = 8,
+
+    }
+
+    public class CurrentInfoDto
+    {
+        public int PageIndex { get; set; }
+        public int PageSize { get; set; }
+        public string OpenId { get; set; }
+        public string QueryDate { get; set; }
+    }
+
+    public class CurrentInfoReturnDto
+    {
+        public List<List<CurrentInfoListDto>> MyRecord { get; set; }
+        public List<List<CurrentInfoListDto>> MyReport { get; set; }
+    }
+
+    public class CurrentInfoListDto
+    {
+        public int? DataCode   { get; set; }
+        public string DataValue  { get; set; }
+        public string DataName { get; set; }
+        public string CreateTime { get; set; }
+        public string RecordTime { get; set; }
+        public string ReportName { get; set; }
+        public string Unit { get; set; }
+        public bool IsNomoal { get; set; }
+    }
+
 
     /// <summary>
     /// 重置密码

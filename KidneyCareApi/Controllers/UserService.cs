@@ -6,6 +6,7 @@ using System.Net.Http;
 using System.Web.Http;
 using KidneyCareApi.Dal;
 using KidneyCareApi.Dto;
+using WebGrease.Css.Extensions;
 
 
 namespace KidneyCareApi.Controllers
@@ -162,6 +163,125 @@ namespace KidneyCareApi.Controllers
 
             //db.Users.Add(new User(){Doctors = });
             return Util.ReturnOkResult(true);
+        }
+
+        /// <summary>
+        /// 获取医学代码的名称
+        /// </summary>
+        /// <param name="code"></param>
+        /// <returns></returns>
+        private string GetNameByCode(int code)
+        {
+           return ((PatientsDataType) code).GetEnumDes();
+        }
+
+        /// <summary>
+        /// 获取医学代码的名称
+        /// </summary>
+        /// <param name="formType"></param>
+        /// <returns></returns>
+        private string GetNameByFormType(int formType)
+        {
+            return ((PatientsDataType)formType).GetEnumDes();
+        }
+
+        /// <summary>
+        /// 获取医学代码的名称
+        /// </summary>
+        /// <param name="reportType"></param>
+        /// <returns></returns>
+        private string GetNameByReportType(int reportType)
+        {
+            return ((ReportType)reportType).GetEnumDes();
+        }
+
+        /// <summary>
+        /// 注册
+        /// </summary>
+        /// <param name="dto"></param>
+        /// <returns></returns>
+        [HttpGet]
+        [Route("getCurrentDayInfoList/{queryDate}/{openId}")]
+        public ResultPakage<CurrentInfoReturnDto> GetCurrentDayInfoList(string queryDate,string openId)
+        {
+            Db db = new Db();
+            CurrentInfoReturnDto returnDto = new CurrentInfoReturnDto();
+            
+            List <List<CurrentInfoListDto>> MyRecord = new List<List<CurrentInfoListDto>>();
+            List <List<CurrentInfoListDto>> MyReport = new List<List<CurrentInfoListDto>>();
+
+            //根据openid 查询病人信息
+            var patient = db.Users.Where(a => a.OpenId == openId).First().Patients.First();
+            //var patient = db.Patients.First(a => a.User.OpenId == openId);
+            //病人当天的所有自我记录信息
+            var patientData = db.PatientsDatas.Where(a => a.RecordDate == queryDate && a.ReportId == null).Select(a => new { a.DataCode, a.DataValue ,a.CreateTime,a.RecordTime,a.FormType }).ToList();
+            //病人当天的所有的报告信息
+            List< CurrentInfoListDto > reportList = new List<CurrentInfoListDto>();  
+
+            var reportData = db.Reports.Where(a => a.ReportDate == queryDate).Select(a=>new{a.CreateTime,a.ReportType,a.ReportDate}).ToList();
+            var reportDetailDatas = db.Reports.SelectMany(a => a.PatientsDatas.Select(b=>new { b.DataCode, b.DataValue, b.CreateTime, b.RecordTime})).ToList();
+            reportData.ForEach(a =>
+            {
+                CurrentInfoListDto recordDto= new CurrentInfoListDto();
+                recordDto.ReportName = GetNameByReportType(a.ReportType??1);
+                recordDto.CreateTime = a.CreateTime?.ToString("yyyy-MM-dd HH:mm:ss");
+                reportList.Add(recordDto);
+            });
+
+            reportDetailDatas.ForEach(item =>
+            {
+                CurrentInfoListDto oneReturnDto = new CurrentInfoListDto();
+                oneReturnDto.DataValue = item.DataValue;
+                oneReturnDto.CreateTime = item.CreateTime?.ToString("yyyy-MM-dd HH:mm:ss");
+                oneReturnDto.DataCode = item.DataCode;
+                oneReturnDto.RecordTime = item.RecordTime;
+                oneReturnDto.DataName = GetNameByCode(item.DataCode ?? 9);
+                reportList.Add(oneReturnDto);
+            });
+
+            reportList.GroupBy(a => a.CreateTime).ForEach(a =>
+            {
+                List<CurrentInfoListDto> MyRecordList = new List<CurrentInfoListDto>();
+                a.ForEach(item =>
+                {
+                    MyRecordList.Add(item);
+                });
+                MyReport.Add(MyRecordList);
+            });
+
+
+
+        //合并数据
+        //Step1 病人当天数据按创建时间进行分组
+            patientData.GroupBy(a => a.CreateTime).ForEach(a =>
+            {
+                List<CurrentInfoListDto> MyRecordList = new List<CurrentInfoListDto>();
+                a.ForEach(item =>
+                {
+                    CurrentInfoListDto oneReturnDto = new CurrentInfoListDto();
+                    oneReturnDto.DataValue = item.DataValue;
+                    oneReturnDto.CreateTime = item.CreateTime?.ToString("yyyy-MM-dd HH:mm:ss");
+                    oneReturnDto.DataCode = item.DataCode;
+                    oneReturnDto.RecordTime = item.RecordTime;
+                    if (item.FormType != 0)
+                    {
+                        oneReturnDto.DataName = GetNameByFormType(item.FormType ?? 0);
+                    }
+                    else
+                    {
+                        oneReturnDto.DataName = GetNameByCode(item.DataCode??9);
+                    }
+                    MyRecordList.Add(oneReturnDto);
+                });
+                MyRecord.Add(MyRecordList);
+            });
+            //Step2 病人当天数据按创建时间进行分组
+
+            returnDto.MyRecord = MyRecord;
+            returnDto.MyReport = MyReport;
+
+
+            return Util.ReturnOkResult(returnDto);
         }
     }
 }
