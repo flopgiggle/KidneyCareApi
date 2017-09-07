@@ -292,36 +292,36 @@ namespace KidneyCareApi.Controllers
         /// <returns></returns>
         [HttpGet]
         [Route("getReportHistory/{year}/{openId}")]
-        public ResultPakage<List<ReportHistoryReturnDto>> GetReportHistory(string year, string openId)
+        public ResultPakage<ReportAndHistoryReturnDto> GetReportHistory(string year, string openId)
         {
             Db db = new Db();
-            List<ReportHistoryReturnDto> returnDto = new List<ReportHistoryReturnDto>();
+            ReportAndHistoryReturnDto reportAndHistoryReturnDto = new ReportAndHistoryReturnDto();
+            
+            List<ReportHistoryReturnDto> reportHistoryReturnDtos = new List<ReportHistoryReturnDto>();
+
+            List<ReportDto> repotList = new List<ReportDto>();
+
+            reportAndHistoryReturnDto.ReportHistory = reportHistoryReturnDtos;
+            reportAndHistoryReturnDto.ReportItem = repotList;
+
+
             var startDate = year + "-" + "01" + "-"+"01";
             var endDate = year + "-" + "12" + "-" + "31";
             //查询病人历史的数据
             //根据openid 查询病人信息
             var patient = db.Users.First(a => a.OpenId == openId).Patients.First();
             //病人当年的所有的报告信息
-            var reportData = db.Reports.Where(a => a.ReportDate.CompareTo(startDate)>0 && a.ReportDate.CompareTo(endDate)<0 && a.PatientId == patient.Id).Select(a => new { a.CreateTime, a.ReportType, a.ReportDate }).ToList();
+            var reportData = db.Reports.Where(a => a.ReportDate.CompareTo(startDate)>0 && a.ReportDate.CompareTo(endDate)<0 && a.PatientId == patient.Id).Select(a => new { a.CreateTime, a.ReportType, a.ReportDate ,a.ImageUrl}).ToList();
 
+            reportData.ForEach(a =>
+            {
+                ReportDto reportDto = new ReportDto();
+                reportDto.ReportDate = a.ReportDate;
+                reportDto.ReportType = GetNameByReportType(a.ReportType??0);
+                reportDto.ImageUrl = a.ImageUrl;
+                repotList.Add(reportDto);
+            });
 
-            var reportDetailDat2as10 = db.PatientsDatas
-                .Where(a => a.PatientId == patient.Id).ToList();
-
-            var reportDetailDa44tas10 = db.PatientsDatas
-                .Where(a =>a.Report.PatientId == patient.Id).ToList();
-
-            var reportDetailDatas10 = db.PatientsDatas
-                .Where(a => a.PatientId == patient.Id && a.Report.PatientId == patient.Id).ToList();
-
-            //获取当年的所有指标记录,如果一天中有重复的则取最新的一次结果
-            var reportDetailDatas1 = db.PatientsDatas
-                .Where(a => a.PatientId == patient.Id && a.Report.PatientId == patient.Id)
-                .GroupBy(b => new {b.RecordDate, b.DataCode}).ToList();
-
-            var reportDetailDatas12= db.PatientsDatas
-                .Where(a => a.PatientId == patient.Id && a.Report.PatientId == patient.Id)
-                .GroupBy(b => b.RecordDate).ToList();
 
 
             //获取当年的所有指标记录,如果一天中有重复的则取最新的一次结果
@@ -355,10 +355,86 @@ namespace KidneyCareApi.Controllers
                 });
                 historyDto.Values = Values;
                 historyDto.Xdata = Xxdata;
-                returnDto.Add(historyDto);
+                reportHistoryReturnDtos.Add(historyDto);
             });
 
-            return Util.ReturnOkResult(returnDto);
+            return Util.ReturnOkResult(reportAndHistoryReturnDto);
+        }
+
+        /// <summary>
+        /// 查询每日记录历史
+        /// </summary>
+        /// <param name="dto"></param>
+        /// <returns></returns>
+        [HttpGet]
+        [Route("getReportHistory/{year}/{openId}")]
+        public ResultPakage<ReportAndHistoryReturnDto> GetMyRecordHistory(string year, string openId)
+        {
+            Db db = new Db();
+            ReportAndHistoryReturnDto reportAndHistoryReturnDto = new ReportAndHistoryReturnDto();
+
+            List<ReportHistoryReturnDto> reportHistoryReturnDtos = new List<ReportHistoryReturnDto>();
+
+            List<ReportDto> repotList = new List<ReportDto>();
+
+            reportAndHistoryReturnDto.ReportHistory = reportHistoryReturnDtos;
+            reportAndHistoryReturnDto.ReportItem = repotList;
+
+
+            var startDate = year + "-" + "01" + "-" + "01";
+            var endDate = year + "-" + "12" + "-" + "31";
+            //查询病人历史的数据
+            //根据openid 查询病人信息
+            var patient = db.Users.First(a => a.OpenId == openId).Patients.First();
+            //病人当年的所有的报告信息
+            var reportData = db.Reports.Where(a => a.ReportDate.CompareTo(startDate) > 0 && a.ReportDate.CompareTo(endDate) < 0 && a.PatientId == patient.Id).Select(a => new { a.CreateTime, a.ReportType, a.ReportDate, a.ImageUrl }).ToList();
+
+            reportData.ForEach(a =>
+            {
+                ReportDto reportDto = new ReportDto();
+                reportDto.ReportDate = a.ReportDate;
+                reportDto.ReportType = GetNameByReportType(a.ReportType ?? 0);
+                reportDto.ImageUrl = a.ImageUrl;
+                repotList.Add(reportDto);
+            });
+
+
+
+            //获取当年的所有指标记录,如果一天中有重复的则取最新的一次结果
+            var reportDetailDatas = db.PatientsDatas.Where(a => a.PatientId == patient.Id && a.Report.PatientId == patient.Id)
+                .GroupBy(b => new { b.RecordDate, b.DataCode }).Select(c => new
+                {
+                    RecordDate = c.Max(x => x.RecordDate),
+                    RecordTime = c.Max(x => x.RecordTime),
+                    DataCode = c.Max(x => x.DataCode),
+                    DataValue = c.Max(x => x.DataValue),
+                    CreateTime = c.Max(x => x.CreateTime)
+                }).ToList();
+
+            //var reportDetailDatas = db.Reports.Where(a => a.ReportDate.CompareTo(startDate) > 0 && a.ReportDate.CompareTo(endDate) < 0 && a.PatientId == patient.Id)
+            //                               .SelectMany(a => a.PatientsDatas.GroupBy(b=>new {b.RecordDate,b.DataCode})
+            //                                        .Select(c => new { RecordDate = c.Max(x => x.RecordDate), RecordTime =c.Max(x=>x.RecordTime), DataCode = c.Max(x => x.DataCode), DataValue = c.Max(x => x.DataValue), CreateTime = c.Max(x => x.CreateTime) })).ToList();
+
+            //根据指标类型进行数据分类
+            reportDetailDatas.GroupBy(a => a.DataCode).ForEach(a =>
+            {
+                ReportHistoryReturnDto historyDto = new ReportHistoryReturnDto();
+                List<string> Xxdata = new List<string>();
+                List<string> Values = new List<string>();
+                a.OrderBy(b => b.RecordTime).ForEach(item =>
+                {
+                    Xxdata.Add(item.RecordDate);
+                    Values.Add(item.DataValue);
+                    historyDto.Name = GetNameByCode(item.DataCode ?? 9);
+                    historyDto.UnitName = "待定";
+                    historyDto.DataCode = "code" + item.DataCode;
+                });
+                historyDto.Values = Values;
+                historyDto.Xdata = Xxdata;
+                reportHistoryReturnDtos.Add(historyDto);
+            });
+
+            return Util.ReturnOkResult(reportAndHistoryReturnDto);
         }
     }
 }

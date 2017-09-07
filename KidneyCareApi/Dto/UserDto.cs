@@ -500,6 +500,11 @@ namespace KidneyCareApi.Dto
         public bool IsNomoal { get; set; }
     }
 
+    public class  ReportAndHistoryReturnDto{
+        public List<ReportHistoryReturnDto> ReportHistory { get; set; }
+        public List<ReportDto> ReportItem { get; set; }
+    }
+
     public class ReportHistoryReturnDto
     {
         public List<string> Xdata { get; set; }
