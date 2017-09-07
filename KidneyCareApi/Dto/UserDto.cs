@@ -488,6 +488,46 @@ namespace KidneyCareApi.Dto
         public List<List<CurrentInfoListDto>> MyReport { get; set; }
     }
 
+    public class GetMyRecordHistoryDto
+    {
+        /// <summary>
+        /// 收缩压
+        /// </summary>
+        public List<string> SystolicPressure { get; set; }
+        /// <summary>
+        /// 舒张压
+        /// </summary>
+        public List<string> DiastolicPressure { get; set; }
+        /// <summary>
+        /// 心率
+        /// </summary>
+        public List<string> HeartRate { get; set; }
+        /// <summary>
+        /// 空腹血糖
+        /// </summary>
+        public List<string> FastingBloodGlucose { get; set; }
+        /// <summary>
+        /// 早餐后血糖
+        /// </summary>
+        public List<string> BreakfastBloodGlucose { get; set; }
+        /// <summary>
+        /// 午餐后血糖
+        /// </summary>
+        public List<string> LunchBloodGlucose { get; set; }
+        /// <summary>
+        /// 晚餐后血糖
+        /// </summary>
+        public List<string> DinnerBloodGlucose { get; set; }
+        /// <summary>
+        /// 随机血糖
+        /// </summary>
+        public List<string> RandomBloodGlucose { get; set; }
+        /// <summary>
+        /// 日期
+        /// </summary>
+        public List<string> Date { get; set; }
+    }
+
     public class CurrentInfoListDto
     {
         public int? DataCode   { get; set; }

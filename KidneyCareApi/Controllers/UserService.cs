@@ -361,80 +361,87 @@ namespace KidneyCareApi.Controllers
             return Util.ReturnOkResult(reportAndHistoryReturnDto);
         }
 
+
         /// <summary>
-        /// 查询每日记录历史
+        /// 查询最近7天的每日记录历史
         /// </summary>
         /// <param name="dto"></param>
         /// <returns></returns>
         [HttpGet]
-        [Route("getReportHistory/{year}/{openId}")]
-        public ResultPakage<ReportAndHistoryReturnDto> GetMyRecordHistory(string year, string openId)
+        [Route("getMyRecordHistory/{days}/{openId}")]
+        public ResultPakage<GetMyRecordHistoryDto> GetMyRecordHistory(string days, string openId)
         {
             Db db = new Db();
-            ReportAndHistoryReturnDto reportAndHistoryReturnDto = new ReportAndHistoryReturnDto();
+            GetMyRecordHistoryDto dto = new GetMyRecordHistoryDto();
+            //查询当前日期7天之内的数据
+            var startDate = DateTime.Now.AddDays(-7).ToString("yyyy-MM-dd");
 
-            List<ReportHistoryReturnDto> reportHistoryReturnDtos = new List<ReportHistoryReturnDto>();
-
-            List<ReportDto> repotList = new List<ReportDto>();
-
-            reportAndHistoryReturnDto.ReportHistory = reportHistoryReturnDtos;
-            reportAndHistoryReturnDto.ReportItem = repotList;
-
-
-            var startDate = year + "-" + "01" + "-" + "01";
-            var endDate = year + "-" + "12" + "-" + "31";
             //查询病人历史的数据
             //根据openid 查询病人信息
             var patient = db.Users.First(a => a.OpenId == openId).Patients.First();
-            //病人当年的所有的报告信息
-            var reportData = db.Reports.Where(a => a.ReportDate.CompareTo(startDate) > 0 && a.ReportDate.CompareTo(endDate) < 0 && a.PatientId == patient.Id).Select(a => new { a.CreateTime, a.ReportType, a.ReportDate, a.ImageUrl }).ToList();
 
-            reportData.ForEach(a =>
-            {
-                ReportDto reportDto = new ReportDto();
-                reportDto.ReportDate = a.ReportDate;
-                reportDto.ReportType = GetNameByReportType(a.ReportType ?? 0);
-                reportDto.ImageUrl = a.ImageUrl;
-                repotList.Add(reportDto);
-            });
-
-
-
-            //获取当年的所有指标记录,如果一天中有重复的则取最新的一次结果
-            var reportDetailDatas = db.PatientsDatas.Where(a => a.PatientId == patient.Id && a.Report.PatientId == patient.Id)
-                .GroupBy(b => new { b.RecordDate, b.DataCode }).Select(c => new
+            //病人最近7天的所有的报告信息,每天只取一个记录，且该记录为一天中最新的一个
+            var reportDetailDatas = db.PatientsDatas.Where(a => a.PatientId == patient.Id && a.ReportId == null && a.RecordTime.CompareTo(startDate)>0)
+                .Select(c => new
                 {
-                    RecordDate = c.Max(x => x.RecordDate),
-                    RecordTime = c.Max(x => x.RecordTime),
-                    DataCode = c.Max(x => x.DataCode),
-                    DataValue = c.Max(x => x.DataValue),
-                    CreateTime = c.Max(x => x.CreateTime)
-                }).ToList();
+                    c.RecordDate,
+                    c.RecordTime,
+                   c.DataCode,
+                    c.DataValue,
+                   c.CreateTime,
+                   c.FormType
+                }).OrderBy(a => a.RecordDate).ThenBy(a => a.RecordTime).ToList();
 
-            //var reportDetailDatas = db.Reports.Where(a => a.ReportDate.CompareTo(startDate) > 0 && a.ReportDate.CompareTo(endDate) < 0 && a.PatientId == patient.Id)
-            //                               .SelectMany(a => a.PatientsDatas.GroupBy(b=>new {b.RecordDate,b.DataCode})
-            //                                        .Select(c => new { RecordDate = c.Max(x => x.RecordDate), RecordTime =c.Max(x=>x.RecordTime), DataCode = c.Max(x => x.DataCode), DataValue = c.Max(x => x.DataValue), CreateTime = c.Max(x => x.CreateTime) })).ToList();
-
-            //根据指标类型进行数据分类
-            reportDetailDatas.GroupBy(a => a.DataCode).ForEach(a =>
+            //组装7天的数据。如没有数据则使用null代替，图标判断null会不生成图形
+            List<string> SystolicPressure = new List<string>();
+            List<string> DiastolicPressure = new List<string>();
+            List<string> HeartRate= new List<string>();
+            List<string> FastingBloodGlucose = new List<string>();
+            List<string> BreakfastBloodGlucose = new List<string>();
+            List<string> LunchBloodGlucose = new List<string>();
+            List<string> DinnerBloodGlucose = new List<string>();
+            List<string> RandomBloodGlucose = new List<string>();
+            List<string> Date = new List<string>();
+            dto.SystolicPressure = SystolicPressure;
+            dto.DiastolicPressure = DiastolicPressure;
+            dto.HeartRate = HeartRate;
+            dto.FastingBloodGlucose = FastingBloodGlucose;
+            dto.BreakfastBloodGlucose = BreakfastBloodGlucose;
+            dto.LunchBloodGlucose = LunchBloodGlucose;
+            dto.DinnerBloodGlucose = DinnerBloodGlucose;
+            dto.RandomBloodGlucose = RandomBloodGlucose;
+            dto.Date = Date;
+            for (int i = 0; i < 7; i++)
             {
-                ReportHistoryReturnDto historyDto = new ReportHistoryReturnDto();
-                List<string> Xxdata = new List<string>();
-                List<string> Values = new List<string>();
-                a.OrderBy(b => b.RecordTime).ForEach(item =>
-                {
-                    Xxdata.Add(item.RecordDate);
-                    Values.Add(item.DataValue);
-                    historyDto.Name = GetNameByCode(item.DataCode ?? 9);
-                    historyDto.UnitName = "待定";
-                    historyDto.DataCode = "code" + item.DataCode;
-                });
-                historyDto.Values = Values;
-                historyDto.Xdata = Xxdata;
-                reportHistoryReturnDtos.Add(historyDto);
-            });
+                var currentDay = DateTime.Now.AddDays(-i).ToString("yyyy-MM-dd");
+                var systolicPressure = reportDetailDatas.Where(a=>a.RecordTime == currentDay && a.DataCode == (int)PatientsDataType.SystolicPressure).Select(a=>a.DataValue).FirstOrDefault();
+                SystolicPressure.Add(systolicPressure);
 
-            return Util.ReturnOkResult(reportAndHistoryReturnDto);
+                var diastolicPressure = reportDetailDatas.Where(a => a.RecordTime == currentDay && a.DataCode == (int)PatientsDataType.DiastolicPressure).Select(a => a.DataValue).FirstOrDefault();
+                DiastolicPressure.Add(diastolicPressure);
+
+                var heartRate = reportDetailDatas.Where(a => a.RecordTime == currentDay && a.DataCode == (int)PatientsDataType.HeartRate).Select(a => a.DataValue).FirstOrDefault();
+                HeartRate.Add(heartRate);
+
+                var fastingBloodGlucose = reportDetailDatas.Where(a => a.RecordTime == currentDay && a.FormType == (int)PatientsDataFormType.FastingBloodGlucose).Select(a => a.DataValue).FirstOrDefault();
+                FastingBloodGlucose.Add(fastingBloodGlucose);
+
+                var breakfastBloodGlucose = reportDetailDatas.Where(a => a.RecordTime == currentDay && a.FormType == (int)PatientsDataFormType.BreakfastBloodGlucose).Select(a => a.DataValue).FirstOrDefault();
+                BreakfastBloodGlucose.Add(breakfastBloodGlucose);
+
+                var lunchBloodGlucose = reportDetailDatas.Where(a => a.RecordTime == currentDay && a.FormType == (int)PatientsDataFormType.LunchBloodGlucose).Select(a => a.DataValue).FirstOrDefault();
+                LunchBloodGlucose.Add(lunchBloodGlucose);
+
+                var dinnerBloodGlucose = reportDetailDatas.Where(a => a.RecordTime == currentDay && a.FormType == (int)PatientsDataFormType.DinnerBloodGlucose).Select(a => a.DataValue).FirstOrDefault();
+                DinnerBloodGlucose.Add(dinnerBloodGlucose);
+
+                var randomBloodGlucose = reportDetailDatas.Where(a => a.RecordTime == currentDay && a.FormType == (int)PatientsDataFormType.RandomBloodGlucose).Select(a => a.DataValue).FirstOrDefault();
+                RandomBloodGlucose.Add(randomBloodGlucose);
+
+                Date.Add(DateTime.Now.AddDays(-i).ToString("dd")+"日");
+            }
+
+            return Util.ReturnOkResult(dto);
         }
     }
 }
