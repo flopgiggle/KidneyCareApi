@@ -158,6 +158,7 @@ namespace KidneyCareApi.Controllers
             user.Status = 1;
             user.OpenId = dto.OpenId;
             user.IdCard = dto.IdCard;
+            user.UserName = dto.UserName;
 
             Dal.Patient patient = new Patient();
             patient.User = user;
@@ -222,7 +223,7 @@ namespace KidneyCareApi.Controllers
             var patient = db.Users.First(a => a.OpenId == openId).Patients.First();
 
             //查询当前病人的标准指标信息
-            var indicators = db.IndicatorsRanges.Where(a => a.Hospital.Id == patient.Hospital.Id && a.PatientId == patient.Id).ToList();
+            var indicators = db.IndicatorsRanges.Where(a => a.Hospital.Id == patient.Hospital.Id).ToList();
 
             //var patient = db.Patients.First(a => a.User.OpenId == openId);
             //病人当天的所有自我记录信息
@@ -465,7 +466,7 @@ namespace KidneyCareApi.Controllers
             List<string> Date = new List<string>();
 
             dto.Date = Date;
-            for (int i = 0; i < 7; i++)
+            for (int i = 6; i > -1; i--)
             {
                 var currentDay = DateTime.Now.AddDays(-i).ToString("yyyy-MM-dd");
                 var systolicPressure = reportDetailDatas.Where(a=>a.RecordDate == currentDay && a.DataCode == (int)PatientsDataType.SystolicPressure).Select(a=>a.DataValue).FirstOrDefault();
