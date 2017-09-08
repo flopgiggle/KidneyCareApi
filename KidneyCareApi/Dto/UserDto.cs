@@ -73,6 +73,7 @@ namespace KidneyCareApi.Dto
         public int UserType { get; set; }
         public int BelongToNurse { get; set; }
         public int BelongToDoctor { get; set; }
+        public string IdCard { get; set; }
         public string OpenId { get; set; }
     }
 

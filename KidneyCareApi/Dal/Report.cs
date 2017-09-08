@@ -44,6 +44,12 @@ namespace KidneyCareApi.Dal
         [StringLength(500)]
         public string ImageUrl6 { get; set; }
 
+        [StringLength(500)]
+        public string ImageUrl7 { get; set; }
+
+        [StringLength(500)]
+        public string ImageUrl8 { get; set; }
+
         [Column(TypeName = "blob")]
         public byte[] ImageData { get; set; }
 

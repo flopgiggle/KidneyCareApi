@@ -200,6 +200,7 @@
     <Compile Include="Dal\Db.cs" />
     <Compile Include="Dal\Doctor.cs" />
     <Compile Include="Dal\Hospital.cs" />
+    <Compile Include="Dal\IndicatorsRange.cs" />
     <Compile Include="Dal\Message.cs" />
     <Compile Include="Dal\Nurse.cs" />
     <Compile Include="Dal\Patient.cs" />

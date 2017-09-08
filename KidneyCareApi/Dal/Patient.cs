@@ -12,6 +12,7 @@ namespace KidneyCareApi.Dal
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
         public Patient()
         {
+            IndicatorsRanges = new HashSet<IndicatorsRange>();
             PatientsDatas = new HashSet<PatientsData>();
             Reports = new HashSet<Report>();
         }
@@ -37,6 +38,9 @@ namespace KidneyCareApi.Dal
         public virtual Doctor Doctor { get; set; }
 
         public virtual Hospital Hospital { get; set; }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<IndicatorsRange> IndicatorsRanges { get; set; }
 
         public virtual Nurse Nurse { get; set; }
 

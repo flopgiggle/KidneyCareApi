@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
 using System.Net.Http;
+using System.Security.Claims;
 using System.Web.Http;
 using Antlr.Runtime.Tree;
 using KidneyCareApi.Dal;
@@ -56,8 +57,8 @@ namespace KidneyCareApi.Controllers
         /// <param name="id">用户Id</param>
         /// <returns></returns>
         [HttpGet]
-        [Route("getUserInfo/{code}")]
-        public ResultPakage<User> GetUserInfo(string code)
+        [Route("getUserInfo/{code}/{openId}")]
+        public ResultPakage<User> GetUserInfo(string code,string openId)
         {
             //HttpClient http = new HttpClient();
 
@@ -70,7 +71,7 @@ namespace KidneyCareApi.Controllers
             var result = http.GetHtml(item).Html;
 
             //在微信获取OpenId
-            var openId = "123456";
+            //var openId = openId;
             //根据OpenId获取用户信息
             Db db = new Db();
             var user = db.Users.Where(a => a.OpenId == openId);
@@ -82,10 +83,14 @@ namespace KidneyCareApi.Controllers
 
             //var result = http.GetAsync("https://api.weixin.qq.com/sns/jscode2session?appid=wx941fffa48c073a0d&secret=1b71efd31775ec025045185b951e0296&js_code="+ code + "&grant_type=authorization_code").Result.Content.ToString();
             //return Util.ReturnOkResult(user.Select(a=>new User{OpenId = a.OpenId,MobilePhone = a.MobilePhone,Sex = a.Sex,Birthday = a.Birthday}).First());
+            User userInfo = new User();
             var oldUser = user.First();
-            var user1 = new User();
-            user1.Status = 1;
-            return Util.ReturnOkResult(user1);
+            userInfo.CreateTime = oldUser.CreateTime;
+            userInfo.Birthday = oldUser.Birthday;
+            userInfo.UserName = oldUser.UserName;
+            userInfo.Sex = oldUser.Sex;
+            userInfo.Status = oldUser.Status;
+            return Util.ReturnOkResult(userInfo);
 
             //var httphelper = new HttpHelper(true, accountInfo.virtualAccount);
             //var item = new HttpItem();
@@ -152,6 +157,7 @@ namespace KidneyCareApi.Controllers
             user.Sex = dto.Sex;
             user.Status = 1;
             user.OpenId = dto.OpenId;
+            user.IdCard = dto.IdCard;
 
             Dal.Patient patient = new Patient();
             patient.User = user;
@@ -184,7 +190,7 @@ namespace KidneyCareApi.Controllers
         /// <returns></returns>
         private string GetNameByFormType(int formType)
         {
-            return ((PatientsDataType)formType).GetEnumDes();
+            return ((PatientsDataFormType)formType).GetEnumDes();
         }
 
         /// <summary>
@@ -198,7 +204,7 @@ namespace KidneyCareApi.Controllers
         }
 
         /// <summary>
-        /// 注册
+        /// 查询病人指定日期的指标信息
         /// </summary>
         /// <param name="dto"></param>
         /// <returns></returns>
@@ -214,9 +220,13 @@ namespace KidneyCareApi.Controllers
 
             //根据openid 查询病人信息
             var patient = db.Users.First(a => a.OpenId == openId).Patients.First();
+
+            //查询当前病人的标准指标信息
+            var indicators = db.IndicatorsRanges.Where(a => a.Hospital.Id == patient.Hospital.Id && a.PatientId == patient.Id).ToList();
+
             //var patient = db.Patients.First(a => a.User.OpenId == openId);
             //病人当天的所有自我记录信息
-            var patientData = db.PatientsDatas.Where(a => a.RecordDate == queryDate && a.ReportId == null).Select(a => new { a.DataCode, a.DataValue ,a.CreateTime,a.RecordTime,a.FormType }).ToList();
+            var patientData = db.PatientsDatas.Where(a => a.RecordDate == queryDate && a.ReportId == null && a.PatientId == patient.Id).Select(a => new { a.DataCode, a.DataValue ,a.CreateTime,a.RecordTime,a.FormType }).ToList();
             //病人当天的所有的报告信息
             List< CurrentInfoListDto > reportList = new List<CurrentInfoListDto>();  
 
@@ -247,6 +257,7 @@ namespace KidneyCareApi.Controllers
                 a.ForEach(item =>
                 {
                     MyRecordList.Add(item);
+                    
                 });
                 MyReport.Add(MyRecordList);
             });
@@ -279,11 +290,60 @@ namespace KidneyCareApi.Controllers
             });
             //Step2 病人当天数据按创建时间进行分组
 
+
+            //设置指标异常正常数据
             returnDto.MyRecord = MyRecord;
+            returnDto.MyRecord.ForEach(a=>a.ForEach(b =>
+            {
+                IndicatorJudge(indicators, b);
+            }));
+
+            
+
+
             returnDto.MyReport = MyReport;
+            returnDto.MyReport.ForEach(a => a.ForEach(b =>
+            {
+                IndicatorJudge(indicators, b);
+            }));
 
 
             return Util.ReturnOkResult(returnDto);
+        }
+
+        private void IndicatorJudge(List<IndicatorsRange> indicators,CurrentInfoListDto b)
+        {
+            var indicator = indicators.FirstOrDefault(x => x.DataCode == b.DataCode);
+            if (indicator != null)
+            {
+                b.Unit = indicator.Unit;
+                //如果指标小于最大值
+                if (indicator.Max == null || double.Parse(b.DataValue) < double.Parse(indicator.Max))
+                {
+                    b.IsNomoal = true;
+                }
+                else
+                {
+                    b.IsNomoal = false;
+                    return;
+                }
+
+                //如果指标小于最大值
+                if (indicator.Min == null || double.Parse(b.DataValue) > double.Parse(indicator.Min))
+                {
+                    b.IsNomoal = true;
+                }
+                else
+                {
+                    b.IsNomoal = false;
+                    return;
+                }
+            }
+            else
+            {
+                b.IsNomoal = true;
+                b.Unit = "标准";
+            }
         }
 
         /// <summary>

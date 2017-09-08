@@ -8,7 +8,7 @@ namespace KidneyCareApi.Dal
     public partial class Db : DbContext
     {
         public Db()
-            : base("name=Db2")
+            : base("name=Db3")
         {
         }
 
@@ -16,13 +16,12 @@ namespace KidneyCareApi.Dal
         public virtual DbSet<DataType> DataTypes { get; set; }
         public virtual DbSet<Doctor> Doctors { get; set; }
         public virtual DbSet<Hospital> Hospitals { get; set; }
+        public virtual DbSet<IndicatorsRange> IndicatorsRanges { get; set; }
         public virtual DbSet<Message> Messages { get; set; }
         public virtual DbSet<Nurse> Nurses { get; set; }
         public virtual DbSet<Patient> Patients { get; set; }
         public virtual DbSet<PatientsData> PatientsDatas { get; set; }
         public virtual DbSet<Report> Reports { get; set; }
-        public virtual DbSet<table1> table1 { get; set; }
-        public virtual DbSet<table2> table2 { get; set; }
         public virtual DbSet<User> Users { get; set; }
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
@@ -71,6 +70,26 @@ namespace KidneyCareApi.Dal
                 .WithOptional(e => e.Hospital)
                 .HasForeignKey(e => e.BelongToHospital);
 
+            modelBuilder.Entity<IndicatorsRange>()
+                .Property(e => e.Max)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<IndicatorsRange>()
+                .Property(e => e.Min)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<IndicatorsRange>()
+                .Property(e => e.Sex)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<IndicatorsRange>()
+                .Property(e => e.Before17)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<IndicatorsRange>()
+                .Property(e => e.Equal)
+                .IsUnicode(false);
+
             modelBuilder.Entity<Message>()
                 .Property(e => e.Messge)
                 .IsUnicode(false);
@@ -104,12 +123,36 @@ namespace KidneyCareApi.Dal
                 .Property(e => e.ImageUrl)
                 .IsUnicode(false);
 
-            modelBuilder.Entity<table1>()
-                .Property(e => e.test)
+            modelBuilder.Entity<Report>()
+                .Property(e => e.ImageUrl1)
                 .IsUnicode(false);
 
-            modelBuilder.Entity<table2>()
-                .Property(e => e.dd)
+            modelBuilder.Entity<Report>()
+                .Property(e => e.ImageUrl2)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Report>()
+                .Property(e => e.ImageUrl3)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Report>()
+                .Property(e => e.ImageUrl4)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Report>()
+                .Property(e => e.ImageUrl5)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Report>()
+                .Property(e => e.ImageUrl6)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Report>()
+                .Property(e => e.ImageUrl7)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Report>()
+                .Property(e => e.ImageUrl8)
                 .IsUnicode(false);
 
             modelBuilder.Entity<User>()

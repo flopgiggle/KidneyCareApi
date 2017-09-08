@@ -13,6 +13,7 @@ namespace KidneyCareApi.Dal
         public Hospital()
         {
             Doctors = new HashSet<Doctor>();
+            IndicatorsRanges = new HashSet<IndicatorsRange>();
             Nurses = new HashSet<Nurse>();
             Patients = new HashSet<Patient>();
         }
@@ -35,6 +36,9 @@ namespace KidneyCareApi.Dal
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Doctor> Doctors { get; set; }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<IndicatorsRange> IndicatorsRanges { get; set; }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Nurse> Nurses { get; set; }

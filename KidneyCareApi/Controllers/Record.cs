@@ -157,7 +157,7 @@ namespace KidneyCareApi.Controllers
         }
 
         /// <summary>
-        /// 注册
+        /// 新增报告
         /// </summary>
         /// <param name="dto"></param>
         /// <returns></returns>
@@ -174,6 +174,7 @@ namespace KidneyCareApi.Controllers
             
             Dal.Report report = new Report();
             report.ReportDate = dto.ReportDate;
+            report.ReportType = int.Parse(dto.ReportType);
             report.ReportMark = dto.ReportMark;
             report.ImageUrl = "";
             report.CreateTime = datetime;

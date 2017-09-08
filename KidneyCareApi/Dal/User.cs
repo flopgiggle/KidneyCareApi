@@ -46,6 +46,9 @@ namespace KidneyCareApi.Dal
         [StringLength(255)]
         public string OpenId { get; set; }
 
+        [StringLength(255)]
+        public string IdCard { get; set; }
+
         public int? Status { get; set; }
 
         public DateTime? CreateTime { get; set; }
