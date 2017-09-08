@@ -5,6 +5,7 @@ using System.Data.Entity;
 using System.Linq;
 using System.Net.Http;
 using System.Web.Http;
+using Antlr.Runtime.Tree;
 using KidneyCareApi.Dal;
 using KidneyCareApi.Dto;
 using WebGrease.Css.Extensions;
@@ -381,7 +382,7 @@ namespace KidneyCareApi.Controllers
             var patient = db.Users.First(a => a.OpenId == openId).Patients.First();
 
             //病人最近7天的所有的报告信息,每天只取一个记录，且该记录为一天中最新的一个
-            var reportDetailDatas = db.PatientsDatas.Where(a => a.PatientId == patient.Id && a.ReportId == null && a.RecordTime.CompareTo(startDate)>0)
+            var reportDetailDatas = db.PatientsDatas.Where(a => a.PatientId == patient.Id && a.ReportId == null && a.RecordDate.CompareTo(startDate)>0)
                 .Select(c => new
                 {
                     c.RecordDate,
@@ -402,45 +403,78 @@ namespace KidneyCareApi.Controllers
             List<string> DinnerBloodGlucose = new List<string>();
             List<string> RandomBloodGlucose = new List<string>();
             List<string> Date = new List<string>();
-            dto.SystolicPressure = SystolicPressure;
-            dto.DiastolicPressure = DiastolicPressure;
-            dto.HeartRate = HeartRate;
-            dto.FastingBloodGlucose = FastingBloodGlucose;
-            dto.BreakfastBloodGlucose = BreakfastBloodGlucose;
-            dto.LunchBloodGlucose = LunchBloodGlucose;
-            dto.DinnerBloodGlucose = DinnerBloodGlucose;
-            dto.RandomBloodGlucose = RandomBloodGlucose;
+
             dto.Date = Date;
             for (int i = 0; i < 7; i++)
             {
                 var currentDay = DateTime.Now.AddDays(-i).ToString("yyyy-MM-dd");
-                var systolicPressure = reportDetailDatas.Where(a=>a.RecordTime == currentDay && a.DataCode == (int)PatientsDataType.SystolicPressure).Select(a=>a.DataValue).FirstOrDefault();
+                var systolicPressure = reportDetailDatas.Where(a=>a.RecordDate == currentDay && a.DataCode == (int)PatientsDataType.SystolicPressure).Select(a=>a.DataValue).FirstOrDefault();
                 SystolicPressure.Add(systolicPressure);
 
-                var diastolicPressure = reportDetailDatas.Where(a => a.RecordTime == currentDay && a.DataCode == (int)PatientsDataType.DiastolicPressure).Select(a => a.DataValue).FirstOrDefault();
+                var diastolicPressure = reportDetailDatas.Where(a => a.RecordDate == currentDay && a.DataCode == (int)PatientsDataType.DiastolicPressure).Select(a => a.DataValue).FirstOrDefault();
                 DiastolicPressure.Add(diastolicPressure);
 
-                var heartRate = reportDetailDatas.Where(a => a.RecordTime == currentDay && a.DataCode == (int)PatientsDataType.HeartRate).Select(a => a.DataValue).FirstOrDefault();
+                var heartRate = reportDetailDatas.Where(a => a.RecordDate == currentDay && a.DataCode == (int)PatientsDataType.HeartRate).Select(a => a.DataValue).FirstOrDefault();
                 HeartRate.Add(heartRate);
 
-                var fastingBloodGlucose = reportDetailDatas.Where(a => a.RecordTime == currentDay && a.FormType == (int)PatientsDataFormType.FastingBloodGlucose).Select(a => a.DataValue).FirstOrDefault();
+                var fastingBloodGlucose = reportDetailDatas.Where(a => a.RecordDate == currentDay && a.FormType == (int)PatientsDataFormType.FastingBloodGlucose).Select(a => a.DataValue).FirstOrDefault();
                 FastingBloodGlucose.Add(fastingBloodGlucose);
 
-                var breakfastBloodGlucose = reportDetailDatas.Where(a => a.RecordTime == currentDay && a.FormType == (int)PatientsDataFormType.BreakfastBloodGlucose).Select(a => a.DataValue).FirstOrDefault();
+                var breakfastBloodGlucose = reportDetailDatas.Where(a => a.RecordDate == currentDay && a.FormType == (int)PatientsDataFormType.BreakfastBloodGlucose).Select(a => a.DataValue).FirstOrDefault();
                 BreakfastBloodGlucose.Add(breakfastBloodGlucose);
 
-                var lunchBloodGlucose = reportDetailDatas.Where(a => a.RecordTime == currentDay && a.FormType == (int)PatientsDataFormType.LunchBloodGlucose).Select(a => a.DataValue).FirstOrDefault();
+                var lunchBloodGlucose = reportDetailDatas.Where(a => a.RecordDate == currentDay && a.FormType == (int)PatientsDataFormType.LunchBloodGlucose).Select(a => a.DataValue).FirstOrDefault();
                 LunchBloodGlucose.Add(lunchBloodGlucose);
 
-                var dinnerBloodGlucose = reportDetailDatas.Where(a => a.RecordTime == currentDay && a.FormType == (int)PatientsDataFormType.DinnerBloodGlucose).Select(a => a.DataValue).FirstOrDefault();
+                var dinnerBloodGlucose = reportDetailDatas.Where(a => a.RecordDate == currentDay && a.FormType == (int)PatientsDataFormType.DinnerBloodGlucose).Select(a => a.DataValue).FirstOrDefault();
                 DinnerBloodGlucose.Add(dinnerBloodGlucose);
 
-                var randomBloodGlucose = reportDetailDatas.Where(a => a.RecordTime == currentDay && a.FormType == (int)PatientsDataFormType.RandomBloodGlucose).Select(a => a.DataValue).FirstOrDefault();
+                var randomBloodGlucose = reportDetailDatas.Where(a => a.RecordDate == currentDay && a.FormType == (int)PatientsDataFormType.RandomBloodGlucose).Select(a => a.DataValue).FirstOrDefault();
                 RandomBloodGlucose.Add(randomBloodGlucose);
 
                 Date.Add(DateTime.Now.AddDays(-i).ToString("dd")+"日");
             }
 
+            dto.SystolicPressure = SystolicPressure;
+            if (dto.SystolicPressure.All(a => a == null))
+            {
+                dto.SystolicPressure.Add("0");
+            }
+            dto.DiastolicPressure = DiastolicPressure;
+            if (dto.DiastolicPressure.All(a => a == null))
+            {
+                dto.DiastolicPressure.Add("0");
+            }
+            dto.HeartRate = HeartRate;
+            if (dto.HeartRate.All(a => a == null))
+            {
+                dto.HeartRate.Add("0");
+            }
+            dto.FastingBloodGlucose = FastingBloodGlucose;
+            if (dto.FastingBloodGlucose.All(a => a == null))
+            {
+                dto.FastingBloodGlucose.Add("0");
+            }
+            dto.BreakfastBloodGlucose = BreakfastBloodGlucose;
+            if (dto.BreakfastBloodGlucose.All(a => a == null))
+            {
+                dto.BreakfastBloodGlucose.Add("0");
+            }
+            dto.LunchBloodGlucose = LunchBloodGlucose;
+            if (dto.LunchBloodGlucose.All(a => a == null))
+            {
+                dto.LunchBloodGlucose.Add("0");
+            }
+            dto.DinnerBloodGlucose = DinnerBloodGlucose;
+            if (dto.DinnerBloodGlucose.All(a => a == null))
+            {
+                dto.DinnerBloodGlucose.Add("0");
+            }
+            dto.RandomBloodGlucose = RandomBloodGlucose;
+            if (dto.RandomBloodGlucose.All(a => a == null))
+            {
+                dto.RandomBloodGlucose.Add("0");
+            }
             return Util.ReturnOkResult(dto);
         }
     }
