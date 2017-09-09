@@ -27,6 +27,13 @@ namespace KidneyCareApi.Dal
 
         public int? BelongToDoctor { get; set; }
 
+        public int? CKDLeave { get; set; }
+
+        public int? DiseaseType { get; set; }
+
+        [StringLength(255)]
+        public string BindStatus { get; set; }
+
         public DateTime? CreateTime { get; set; }
 
         public DateTime? UpdateTime { get; set; }

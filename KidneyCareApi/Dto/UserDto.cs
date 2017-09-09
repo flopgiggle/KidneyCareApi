@@ -10,6 +10,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using KidneyCareApi.Dal;
 
 namespace KidneyCareApi.Dto
 {
@@ -75,6 +76,8 @@ namespace KidneyCareApi.Dto
         public int BelongToDoctor { get; set; }
         public string IdCard { get; set; }
         public string OpenId { get; set; }
+        public string CKDLeave { get; set; }
+        public string DiseaseType { get; set; }
     }
 
     public class MyRecordDto
@@ -306,6 +309,18 @@ namespace KidneyCareApi.Dto
         /// </summary>
         [Description("甲状旁腺素")]
         PTH = 21,
+    }
+
+    public class GetUserInfoDto
+    {
+        public string CreateTime { get; set; }
+        public string Birthday { get; set; }
+        public string UserName { get; set; }
+        public string Sex { get; set; }
+        public string Status { get; set; }
+        public string IdCard { get; set; }
+        public string MobilePhone { get; set; }
+        public Patient Patient { get; set; }
     }
 
     public class MedicalIndicators

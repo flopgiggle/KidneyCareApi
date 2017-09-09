@@ -59,7 +59,7 @@ namespace KidneyCareApi.Controllers
         /// <returns></returns>
         [HttpGet]
         [Route("getUserInfo/{code}/{openId}")]
-        public ResultPakage<User> GetUserInfo(string code, string openId)
+        public ResultPakage<GetUserInfoDto> GetUserInfo(string code, string openId)
         {
             //HttpClient http = new HttpClient();
 
@@ -75,7 +75,8 @@ namespace KidneyCareApi.Controllers
             //var openId = openId;
             //根据OpenId获取用户信息
             var db = new Db();
-            var user = db.Users.FirstOrDefault(a => a.OpenId == openId);
+            var patient = db.Users.First(a => a.OpenId == openId).Patients.First();
+            var user = patient.User;
             //查询不到信息则返回空用户信息,则创建一个新的用户
             if (user == null)
             {
@@ -87,17 +88,27 @@ namespace KidneyCareApi.Controllers
                 db.Users.Add(user);
 
                 //创建病人
-                var patient = new Patient();
-                patient.User = user;
-                db.Patients.Add(patient);
+                var newPatient = new Patient();
+                newPatient.User = user;
+                db.Patients.Add(newPatient);
                 db.SaveChanges();
             }
-            var returnUserInfo = new User();
-            returnUserInfo.CreateTime = user.CreateTime;
+            var returnUserInfo = new GetUserInfoDto();
+            returnUserInfo.CreateTime = user.CreateTime?.ToString("yyyy-MM-dd");
             returnUserInfo.Birthday = user.Birthday;
             returnUserInfo.UserName = user.UserName;
+            returnUserInfo.MobilePhone = user.MobilePhone;
+            returnUserInfo.IdCard = user.IdCard;
             returnUserInfo.Sex = user.Sex;
-            returnUserInfo.Status = user.Status;
+            returnUserInfo.Status = user.Status.ToString();
+            Patient returnPatient = new Patient();
+            returnUserInfo.Patient = returnPatient;
+            returnUserInfo.Patient.BelongToDoctor = patient.BelongToDoctor;
+            returnUserInfo.Patient.BelongToHospital = patient.BelongToHospital;
+            returnUserInfo.Patient.BelongToNurse = patient.BelongToNurse;
+            returnUserInfo.Patient.BindStatus = patient.BindStatus;
+            returnUserInfo.Patient.CKDLeave = patient.CKDLeave;
+            returnUserInfo.Patient.DiseaseType = patient.DiseaseType;
             return Util.ReturnOkResult(returnUserInfo);
 
 
@@ -153,11 +164,18 @@ namespace KidneyCareApi.Controllers
             var nurse = db.Nurses.First(a => a.Id == dto.BelongToNurse);
             var hospital = db.Hospitals.First(a => a.Id == dto.BelongToHospital);
             patient.User = user;
+            patient.CKDLeave = int.Parse(dto.CKDLeave);
+            patient.DiseaseType = int.Parse(dto.DiseaseType);
             patient.Hospital = hospital;
             patient.Doctor = doctor;
             patient.Nurse = nurse;
+            patient.BindStatus = (hospital == null ? "1" : "0") + (doctor == null ? "1" : "0") +
+                                 (nurse == null ? "1" : "0");
             patient.CreateTime = DateTime.Now;
+            
+
             db.SaveChanges();
+
 
             //db.Users.Add(new User(){Doctors = });
             return Util.ReturnOkResult(true);
