@@ -167,6 +167,24 @@ namespace KidneyCareApi.Dto
         public MedicalIndicators MedicalIndicators { get; set; }
     }
 
+    /// <summary>
+    /// 用户状态类型，标示用户是否已注册 已填写用户信息 或者已删除
+    /// </summary>
+    public enum UserStatusType
+    {
+        /// <summary>
+        /// 已注册
+        /// </summary>
+        [Description("")]
+        Registered = 1,
+
+        /// <summary>
+        ///     舒张压
+        /// </summary>
+        [Description("完成绑定医院医护信息")]
+        CompleteBinding = 2,
+    }
+
     public enum PatientsDataType
     {
         /// <summary>

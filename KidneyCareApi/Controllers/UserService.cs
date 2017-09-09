@@ -9,6 +9,7 @@ using System.Web.Http;
 using Antlr.Runtime.Tree;
 using KidneyCareApi.Dal;
 using KidneyCareApi.Dto;
+using Microsoft.Ajax.Utilities;
 using WebGrease.Css.Extensions;
 
 
@@ -58,7 +59,7 @@ namespace KidneyCareApi.Controllers
         /// <returns></returns>
         [HttpGet]
         [Route("getUserInfo/{code}/{openId}")]
-        public ResultPakage<User> GetUserInfo(string code,string openId)
+        public ResultPakage<User> GetUserInfo(string code, string openId)
         {
             //HttpClient http = new HttpClient();
 
@@ -73,24 +74,36 @@ namespace KidneyCareApi.Controllers
             //在微信获取OpenId
             //var openId = openId;
             //根据OpenId获取用户信息
-            Db db = new Db();
-            var user = db.Users.Where(a => a.OpenId == openId);
-            //查询不到信息则返回空用户信息
-            if (!user.Any())
+            var db = new Db();
+            var user = db.Users.FirstOrDefault(a => a.OpenId == openId);
+            //查询不到信息则返回空用户信息,则创建一个新的用户
+            if (user == null)
             {
-                return Util.ReturnOkResult(new User(){});
+                //创建用户账户信息
+                user = new User();
+                user.OpenId = openId;
+                user.CreateTime = DateTime.Now;
+                user.Status = (int)UserStatusType.Registered;
+                db.Users.Add(user);
+
+                //创建病人
+                var patient = new Patient();
+                patient.User = user;
+                db.Patients.Add(patient);
+                db.SaveChanges();
             }
+            var returnUserInfo = new User();
+            returnUserInfo.CreateTime = user.CreateTime;
+            returnUserInfo.Birthday = user.Birthday;
+            returnUserInfo.UserName = user.UserName;
+            returnUserInfo.Sex = user.Sex;
+            returnUserInfo.Status = user.Status;
+            return Util.ReturnOkResult(returnUserInfo);
+
 
             //var result = http.GetAsync("https://api.weixin.qq.com/sns/jscode2session?appid=wx941fffa48c073a0d&secret=1b71efd31775ec025045185b951e0296&js_code="+ code + "&grant_type=authorization_code").Result.Content.ToString();
             //return Util.ReturnOkResult(user.Select(a=>new User{OpenId = a.OpenId,MobilePhone = a.MobilePhone,Sex = a.Sex,Birthday = a.Birthday}).First());
-            User userInfo = new User();
-            var oldUser = user.First();
-            userInfo.CreateTime = oldUser.CreateTime;
-            userInfo.Birthday = oldUser.Birthday;
-            userInfo.UserName = oldUser.UserName;
-            userInfo.Sex = oldUser.Sex;
-            userInfo.Status = oldUser.Status;
-            return Util.ReturnOkResult(userInfo);
+
 
             //var httphelper = new HttpHelper(true, accountInfo.virtualAccount);
             //var item = new HttpItem();
@@ -114,18 +127,41 @@ namespace KidneyCareApi.Controllers
             //return ret;
         }
 
-        /// <summary>
-        /// 供货商创建更新
-        /// </summary>
-        /// <param name="user"></param>
-        /// <returns></returns>
-        //[HttpPost]
-        //[Route("CreateUpdateSupplier")]
-        //public ResultPakage<Supplier> CreateUpdateSupplier(SupplierDto user)
-        //{
-        //    var ret = client.CreateUpdateSupplier(user);
-        //    return ret;
-        //}
+        [HttpPost]
+        //[OpenApi]
+        [Route("updateUserInfo")]
+        public ResultPakage<bool> UpdateUserInfo(UserRegistDto dto)
+        {
+            var db = new Db();
+            //获取用户并且设置用户信息
+            var user = db.Users.First(a => a.OpenId == dto.OpenId);
+            //检查此用户是否已存在
+            user.Birthday = dto.Birthday;
+            user.CreateTime = DateTime.Now;
+            user.OpenId = dto.OpenId;
+            user.MobilePhone = dto.MobilePhone;
+            user.Sex = dto.Sex;
+            user.Status = (int)UserStatusType.Registered;
+            user.OpenId = dto.OpenId;
+            user.IdCard = dto.IdCard;
+            user.UserName = dto.UserName;
+
+
+            //获取病人并且设置病人信息
+            var patient = db.Users.First(a => a.OpenId == dto.OpenId).Patients.First();
+            var doctor = db.Doctors.First(a => a.Id == dto.BelongToDoctor);
+            var nurse = db.Nurses.First(a => a.Id == dto.BelongToNurse);
+            var hospital = db.Hospitals.First(a => a.Id == dto.BelongToHospital);
+            patient.User = user;
+            patient.Hospital = hospital;
+            patient.Doctor = doctor;
+            patient.Nurse = nurse;
+            patient.CreateTime = DateTime.Now;
+            db.SaveChanges();
+
+            //db.Users.Add(new User(){Doctors = });
+            return Util.ReturnOkResult(true);
+        }
 
         /// <summary>
         /// 注册
@@ -137,30 +173,28 @@ namespace KidneyCareApi.Controllers
         [Route("regist")]
         public ResultPakage<bool> Regist(UserRegistDto dto)
         {
-            Db db = new Db();
+            var db = new Db();
             //检查此用户是否已存在
             if (db.Users.Any(a => a.OpenId == dto.OpenId))
-            {
                 return Util.ReturnFailResult<bool>("用户已存在");
-            }
 
             var doctor = db.Doctors.First(a => a.Id == dto.BelongToDoctor);
             var nurse = db.Nurses.First(a => a.Id == dto.BelongToNurse);
             var hospital = db.Hospitals.First(a => a.Id == dto.BelongToHospital);
 
             //创建用户
-            Dal.User user = new User();
+            var user = new User();
             user.Birthday = dto.Birthday;
             user.CreateTime = DateTime.Now;
             user.OpenId = dto.OpenId;
             user.MobilePhone = dto.MobilePhone;
             user.Sex = dto.Sex;
-            user.Status = 1;
+            user.Status = (int)UserStatusType.Registered;
             user.OpenId = dto.OpenId;
             user.IdCard = dto.IdCard;
             user.UserName = dto.UserName;
 
-            Dal.Patient patient = new Patient();
+            var patient = new Patient();
             patient.User = user;
             patient.Hospital = hospital;
             patient.Doctor = doctor;
@@ -181,7 +215,7 @@ namespace KidneyCareApi.Controllers
         /// <returns></returns>
         private string GetNameByCode(int code)
         {
-           return ((PatientsDataType) code).GetEnumDes();
+            return ((PatientsDataType)code).GetEnumDes();
         }
 
         /// <summary>
@@ -211,39 +245,45 @@ namespace KidneyCareApi.Controllers
         /// <returns></returns>
         [HttpGet]
         [Route("getCurrentDayInfoList/{queryDate}/{openId}")]
-        public ResultPakage<CurrentInfoReturnDto> GetCurrentDayInfoList(string queryDate,string openId)
+        public ResultPakage<CurrentInfoReturnDto> GetCurrentDayInfoList(string queryDate, string openId)
         {
-            Db db = new Db();
-            CurrentInfoReturnDto returnDto = new CurrentInfoReturnDto();
-            
-            List <List<CurrentInfoListDto>> MyRecord = new List<List<CurrentInfoListDto>>();
-            List <List<CurrentInfoListDto>> MyReport = new List<List<CurrentInfoListDto>>();
+            var db = new Db();
+            var returnDto = new CurrentInfoReturnDto();
+
+            var MyRecord = new List<List<CurrentInfoListDto>>();
+            var MyReport = new List<List<CurrentInfoListDto>>();
 
             //根据openid 查询病人信息
             var patient = db.Users.First(a => a.OpenId == openId).Patients.First();
 
             //查询当前病人的标准指标信息
-            var indicators = db.IndicatorsRanges.Where(a => a.Hospital.Id == patient.Hospital.Id).ToList();
+            //如果当期病人没有绑定医院信息，则默认使用华西医院的标准指标
+            //查询病人医院数据
+            var patientHospitalCode = "5101000001";
+            if (patient.Hospital != null)
+                patientHospitalCode = patient.Hospital.Code;
+
+            var indicators = db.IndicatorsRanges.Where(a => a.Hospital.Code == patientHospitalCode).ToList();
 
             //var patient = db.Patients.First(a => a.User.OpenId == openId);
             //病人当天的所有自我记录信息
-            var patientData = db.PatientsDatas.Where(a => a.RecordDate == queryDate && a.ReportId == null && a.PatientId == patient.Id).Select(a => new { a.DataCode, a.DataValue ,a.CreateTime,a.RecordTime,a.FormType }).ToList();
+            var patientData = db.PatientsDatas.Where(a => a.RecordDate == queryDate && a.ReportId == null && a.PatientId == patient.Id).Select(a => new { a.DataCode, a.DataValue, a.CreateTime, a.RecordTime, a.FormType }).ToList();
             //病人当天的所有的报告信息
-            List< CurrentInfoListDto > reportList = new List<CurrentInfoListDto>();  
+            var reportList = new List<CurrentInfoListDto>();
 
-            var reportData = db.Reports.Where(a => a.ReportDate == queryDate && a.PatientId == patient.Id).Select(a=>new{a.CreateTime,a.ReportType,a.ReportDate}).ToList();
-            var reportDetailDatas = db.Reports.Where(a=> a.ReportDate == queryDate && a.PatientId == patient.Id).SelectMany(a => a.PatientsDatas.Select(b=>new { b.DataCode, b.DataValue, b.CreateTime, b.RecordTime})).ToList();
+            var reportData = db.Reports.Where(a => a.ReportDate == queryDate && a.PatientId == patient.Id).Select(a => new { a.CreateTime, a.ReportType, a.ReportDate }).ToList();
+            var reportDetailDatas = db.Reports.Where(a => a.ReportDate == queryDate && a.PatientId == patient.Id).SelectMany(a => a.PatientsDatas.Select(b => new { b.DataCode, b.DataValue, b.CreateTime, b.RecordTime })).ToList();
             reportData.ForEach(a =>
             {
-                CurrentInfoListDto recordDto= new CurrentInfoListDto();
-                recordDto.ReportName = GetNameByReportType(a.ReportType??1);
+                var recordDto = new CurrentInfoListDto();
+                recordDto.ReportName = GetNameByReportType(a.ReportType ?? 1);
                 recordDto.CreateTime = a.CreateTime?.ToString("yyyy-MM-dd HH:mm:ss");
                 reportList.Add(recordDto);
             });
 
             reportDetailDatas.ForEach(item =>
             {
-                CurrentInfoListDto oneReturnDto = new CurrentInfoListDto();
+                var oneReturnDto = new CurrentInfoListDto();
                 oneReturnDto.DataValue = item.DataValue;
                 oneReturnDto.CreateTime = item.CreateTime?.ToString("yyyy-MM-dd HH:mm:ss");
                 oneReturnDto.DataCode = item.DataCode;
@@ -254,38 +294,67 @@ namespace KidneyCareApi.Controllers
 
             reportList.GroupBy(a => a.CreateTime).ForEach(a =>
             {
-                List<CurrentInfoListDto> MyRecordList = new List<CurrentInfoListDto>();
+                var MyRecordList = new List<CurrentInfoListDto>();
                 a.ForEach(item =>
                 {
                     MyRecordList.Add(item);
-                    
+
                 });
                 MyReport.Add(MyRecordList);
             });
 
 
 
-        //合并数据
-        //Step1 病人当天数据按创建时间进行分组
+            //合并数据
+            //Step1 病人当天数据按创建时间进行分组
             patientData.GroupBy(a => a.CreateTime).ForEach(a =>
             {
-                List<CurrentInfoListDto> MyRecordList = new List<CurrentInfoListDto>();
+                var MyRecordList = new List<CurrentInfoListDto>();
                 a.ForEach(item =>
                 {
-                    CurrentInfoListDto oneReturnDto = new CurrentInfoListDto();
-                    oneReturnDto.DataValue = item.DataValue;
-                    oneReturnDto.CreateTime = item.CreateTime?.ToString("yyyy-MM-dd HH:mm:ss");
-                    oneReturnDto.DataCode = item.DataCode;
-                    oneReturnDto.RecordTime = item.RecordTime;
-                    if (item.FormType != 0)
+                    var oneReturnDto = new CurrentInfoListDto(); var diastolicPressureValue = "";
+                    
+                    //如果类型为舒张压,则直接跳过
+                    if (item.DataCode != (int)PatientsDataType.DiastolicPressure)
                     {
-                        oneReturnDto.DataName = GetNameByFormType(item.FormType ?? 0);
+                        oneReturnDto.CreateTime = item.CreateTime?.ToString("yyyy-MM-dd HH:mm:ss");
+                        oneReturnDto.DataCode = item.DataCode;
+                        oneReturnDto.DataValue = item.DataValue;
+                        oneReturnDto.RecordTime = item.RecordTime;
+                        //如果有表单类型0，则说明为自定义表单字段，需要恢复设置的表单值
+                        if (item.FormType != 0)
+                            oneReturnDto.DataName = GetNameByFormType(item.FormType ?? 0);
+                        else
+                            oneReturnDto.DataName = GetNameByCode(item.DataCode ?? 9);
+                        //判定指标是否正确
+                        IndicatorJudge(indicators, oneReturnDto);
+                        
                     }
-                    else
+
+                    //如果类型为收缩压,则找出对应的舒张压，并把舒张压放入收缩压返回值,并设置名称为血压
+                    if (item.DataCode == (int) PatientsDataType.SystolicPressure)
                     {
-                        oneReturnDto.DataName = GetNameByCode(item.DataCode??9);
+                        //查找对应的舒张压
+                        var diastolicPressure = a.FirstOrDefault(x => x.DataCode == (int) PatientsDataType.DiastolicPressure);
+                        if (diastolicPressure != null)
+                        {
+                            oneReturnDto.DataValue = item.DataValue +"/"+ diastolicPressure.DataValue;
+                        }
+                        //对舒张压值进行判定比较
+                        var diastolicPressureDto = new CurrentInfoListDto();
+                        diastolicPressureDto.DataCode = diastolicPressure.DataCode;
+                        diastolicPressureDto.DataValue = diastolicPressure.DataValue;
+                        IndicatorJudge(indicators, diastolicPressureDto);
+
+                        oneReturnDto.DataName = "血压";
+                        oneReturnDto.IsNomoal = diastolicPressureDto.IsNomoal && oneReturnDto.IsNomoal;
+
                     }
-                    MyRecordList.Add(oneReturnDto);
+
+                    if (item.DataCode != (int) PatientsDataType.DiastolicPressure)
+                    {
+                        MyRecordList.Add(oneReturnDto);
+                    }
                 });
                 MyRecord.Add(MyRecordList);
             });
@@ -294,12 +363,12 @@ namespace KidneyCareApi.Controllers
 
             //设置指标异常正常数据
             returnDto.MyRecord = MyRecord;
-            returnDto.MyRecord.ForEach(a=>a.ForEach(b =>
-            {
-                IndicatorJudge(indicators, b);
-            }));
+            //returnDto.MyRecord.ForEach(a => a.ForEach(b =>
+            //  {
+            //      IndicatorJudge(indicators, b);
+            //  }));
 
-            
+
 
 
             returnDto.MyReport = MyReport;
@@ -312,7 +381,7 @@ namespace KidneyCareApi.Controllers
             return Util.ReturnOkResult(returnDto);
         }
 
-        private void IndicatorJudge(List<IndicatorsRange> indicators,CurrentInfoListDto b)
+        private void IndicatorJudge(List<IndicatorsRange> indicators, CurrentInfoListDto b)
         {
             var indicator = indicators.FirstOrDefault(x => x.DataCode == b.DataCode);
             if (indicator != null)
@@ -356,30 +425,30 @@ namespace KidneyCareApi.Controllers
         [Route("getReportHistory/{year}/{openId}")]
         public ResultPakage<ReportAndHistoryReturnDto> GetReportHistory(string year, string openId)
         {
-            Db db = new Db();
-            ReportAndHistoryReturnDto reportAndHistoryReturnDto = new ReportAndHistoryReturnDto();
-            
-            List<ReportHistoryReturnDto> reportHistoryReturnDtos = new List<ReportHistoryReturnDto>();
+            var db = new Db();
+            var reportAndHistoryReturnDto = new ReportAndHistoryReturnDto();
 
-            List<ReportDto> repotList = new List<ReportDto>();
+            var reportHistoryReturnDtos = new List<ReportHistoryReturnDto>();
+
+            var repotList = new List<ReportDto>();
 
             reportAndHistoryReturnDto.ReportHistory = reportHistoryReturnDtos;
             reportAndHistoryReturnDto.ReportItem = repotList;
 
 
-            var startDate = year + "-" + "01" + "-"+"01";
+            var startDate = year + "-" + "01" + "-" + "01";
             var endDate = year + "-" + "12" + "-" + "31";
             //查询病人历史的数据
             //根据openid 查询病人信息
             var patient = db.Users.First(a => a.OpenId == openId).Patients.First();
             //病人当年的所有的报告信息
-            var reportData = db.Reports.Where(a => a.ReportDate.CompareTo(startDate)>0 && a.ReportDate.CompareTo(endDate)<0 && a.PatientId == patient.Id).Select(a => new { a.CreateTime, a.ReportType, a.ReportDate ,a.ImageUrl}).ToList();
+            var reportData = db.Reports.Where(a => a.ReportDate.CompareTo(startDate) > 0 && a.ReportDate.CompareTo(endDate) < 0 && a.PatientId == patient.Id).Select(a => new { a.CreateTime, a.ReportType, a.ReportDate, a.ImageUrl }).ToList();
 
             reportData.ForEach(a =>
             {
-                ReportDto reportDto = new ReportDto();
+                var reportDto = new ReportDto();
                 reportDto.ReportDate = a.ReportDate;
-                reportDto.ReportType = GetNameByReportType(a.ReportType??0);
+                reportDto.ReportType = GetNameByReportType(a.ReportType ?? 0);
                 reportDto.ImageUrl = a.ImageUrl;
                 repotList.Add(reportDto);
             });
@@ -388,7 +457,7 @@ namespace KidneyCareApi.Controllers
 
             //获取当年的所有指标记录,如果一天中有重复的则取最新的一次结果
             var reportDetailDatas = db.PatientsDatas.Where(a => a.PatientId == patient.Id && a.Report.PatientId == patient.Id)
-                .GroupBy(b => new {b.RecordDate, b.DataCode}).Select(c => new
+                .GroupBy(b => new { b.RecordDate, b.DataCode }).Select(c => new
                 {
                     RecordDate = c.Max(x => x.RecordDate),
                     RecordTime = c.Max(x => x.RecordTime),
@@ -398,23 +467,23 @@ namespace KidneyCareApi.Controllers
                 }).ToList();
 
             //var reportDetailDatas = db.Reports.Where(a => a.ReportDate.CompareTo(startDate) > 0 && a.ReportDate.CompareTo(endDate) < 0 && a.PatientId == patient.Id)
-               //                               .SelectMany(a => a.PatientsDatas.GroupBy(b=>new {b.RecordDate,b.DataCode})
-                //                                        .Select(c => new { RecordDate = c.Max(x => x.RecordDate), RecordTime =c.Max(x=>x.RecordTime), DataCode = c.Max(x => x.DataCode), DataValue = c.Max(x => x.DataValue), CreateTime = c.Max(x => x.CreateTime) })).ToList();
+            //                               .SelectMany(a => a.PatientsDatas.GroupBy(b=>new {b.RecordDate,b.DataCode})
+            //                                        .Select(c => new { RecordDate = c.Max(x => x.RecordDate), RecordTime =c.Max(x=>x.RecordTime), DataCode = c.Max(x => x.DataCode), DataValue = c.Max(x => x.DataValue), CreateTime = c.Max(x => x.CreateTime) })).ToList();
 
             //根据指标类型进行数据分类
             reportDetailDatas.GroupBy(a => a.DataCode).ForEach(a =>
             {
-                ReportHistoryReturnDto historyDto = new ReportHistoryReturnDto();
-                List<string> Xxdata = new List<string>();
-                List<string> Values = new List<string>();
-                a.OrderBy(b=>b.RecordTime).ForEach(item =>
-                {
-                    Xxdata.Add(item.RecordDate);
-                    Values.Add(item.DataValue);
-                    historyDto.Name = GetNameByCode(item.DataCode ?? 9);
-                    historyDto.UnitName = "待定";
-                    historyDto.DataCode = "code"+item.DataCode;
-                });
+                var historyDto = new ReportHistoryReturnDto();
+                var Xxdata = new List<string>();
+                var Values = new List<string>();
+                a.OrderBy(b => b.RecordTime).ForEach(item =>
+                  {
+                      Xxdata.Add(item.RecordDate);
+                      Values.Add(item.DataValue);
+                      historyDto.Name = GetNameByCode(item.DataCode ?? 9);
+                      historyDto.UnitName = "待定";
+                      historyDto.DataCode = "code" + item.DataCode;
+                  });
                 historyDto.Values = Values;
                 historyDto.Xdata = Xxdata;
                 reportHistoryReturnDtos.Add(historyDto);
@@ -433,8 +502,8 @@ namespace KidneyCareApi.Controllers
         [Route("getMyRecordHistory/{days}/{openId}")]
         public ResultPakage<GetMyRecordHistoryDto> GetMyRecordHistory(string days, string openId)
         {
-            Db db = new Db();
-            GetMyRecordHistoryDto dto = new GetMyRecordHistoryDto();
+            var db = new Db();
+            var dto = new GetMyRecordHistoryDto();
             //查询当前日期7天之内的数据
             var startDate = DateTime.Now.AddDays(-7).ToString("yyyy-MM-dd");
 
@@ -443,33 +512,33 @@ namespace KidneyCareApi.Controllers
             var patient = db.Users.First(a => a.OpenId == openId).Patients.First();
 
             //病人最近7天的所有的报告信息,每天只取一个记录，且该记录为一天中最新的一个
-            var reportDetailDatas = db.PatientsDatas.Where(a => a.PatientId == patient.Id && a.ReportId == null && a.RecordDate.CompareTo(startDate)>0)
+            var reportDetailDatas = db.PatientsDatas.Where(a => a.PatientId == patient.Id && a.ReportId == null && a.RecordDate.CompareTo(startDate) > 0)
                 .Select(c => new
                 {
                     c.RecordDate,
                     c.RecordTime,
-                   c.DataCode,
+                    c.DataCode,
                     c.DataValue,
-                   c.CreateTime,
-                   c.FormType
+                    c.CreateTime,
+                    c.FormType
                 }).OrderBy(a => a.RecordDate).ThenBy(a => a.RecordTime).ToList();
 
             //组装7天的数据。如没有数据则使用null代替，图标判断null会不生成图形
-            List<string> SystolicPressure = new List<string>();
-            List<string> DiastolicPressure = new List<string>();
-            List<string> HeartRate= new List<string>();
-            List<string> FastingBloodGlucose = new List<string>();
-            List<string> BreakfastBloodGlucose = new List<string>();
-            List<string> LunchBloodGlucose = new List<string>();
-            List<string> DinnerBloodGlucose = new List<string>();
-            List<string> RandomBloodGlucose = new List<string>();
-            List<string> Date = new List<string>();
+            var SystolicPressure = new List<string>();
+            var DiastolicPressure = new List<string>();
+            var HeartRate = new List<string>();
+            var FastingBloodGlucose = new List<string>();
+            var BreakfastBloodGlucose = new List<string>();
+            var LunchBloodGlucose = new List<string>();
+            var DinnerBloodGlucose = new List<string>();
+            var RandomBloodGlucose = new List<string>();
+            var Date = new List<string>();
 
             dto.Date = Date;
-            for (int i = 6; i > -1; i--)
+            for (var i = 6; i > -1; i--)
             {
                 var currentDay = DateTime.Now.AddDays(-i).ToString("yyyy-MM-dd");
-                var systolicPressure = reportDetailDatas.Where(a=>a.RecordDate == currentDay && a.DataCode == (int)PatientsDataType.SystolicPressure).Select(a=>a.DataValue).FirstOrDefault();
+                var systolicPressure = reportDetailDatas.Where(a => a.RecordDate == currentDay && a.DataCode == (int)PatientsDataType.SystolicPressure).Select(a => a.DataValue).FirstOrDefault();
                 SystolicPressure.Add(systolicPressure);
 
                 var diastolicPressure = reportDetailDatas.Where(a => a.RecordDate == currentDay && a.DataCode == (int)PatientsDataType.DiastolicPressure).Select(a => a.DataValue).FirstOrDefault();
@@ -493,49 +562,33 @@ namespace KidneyCareApi.Controllers
                 var randomBloodGlucose = reportDetailDatas.Where(a => a.RecordDate == currentDay && a.FormType == (int)PatientsDataFormType.RandomBloodGlucose).Select(a => a.DataValue).FirstOrDefault();
                 RandomBloodGlucose.Add(randomBloodGlucose);
 
-                Date.Add(DateTime.Now.AddDays(-i).ToString("dd")+"日");
+                Date.Add(DateTime.Now.AddDays(-i).ToString("dd") + "日");
             }
 
             dto.SystolicPressure = SystolicPressure;
             if (dto.SystolicPressure.All(a => a == null))
-            {
                 dto.SystolicPressure.Add("0");
-            }
             dto.DiastolicPressure = DiastolicPressure;
             if (dto.DiastolicPressure.All(a => a == null))
-            {
                 dto.DiastolicPressure.Add("0");
-            }
             dto.HeartRate = HeartRate;
             if (dto.HeartRate.All(a => a == null))
-            {
                 dto.HeartRate.Add("0");
-            }
             dto.FastingBloodGlucose = FastingBloodGlucose;
             if (dto.FastingBloodGlucose.All(a => a == null))
-            {
                 dto.FastingBloodGlucose.Add("0");
-            }
             dto.BreakfastBloodGlucose = BreakfastBloodGlucose;
             if (dto.BreakfastBloodGlucose.All(a => a == null))
-            {
                 dto.BreakfastBloodGlucose.Add("0");
-            }
             dto.LunchBloodGlucose = LunchBloodGlucose;
             if (dto.LunchBloodGlucose.All(a => a == null))
-            {
                 dto.LunchBloodGlucose.Add("0");
-            }
             dto.DinnerBloodGlucose = DinnerBloodGlucose;
             if (dto.DinnerBloodGlucose.All(a => a == null))
-            {
                 dto.DinnerBloodGlucose.Add("0");
-            }
             dto.RandomBloodGlucose = RandomBloodGlucose;
             if (dto.RandomBloodGlucose.All(a => a == null))
-            {
                 dto.RandomBloodGlucose.Add("0");
-            }
             return Util.ReturnOkResult(dto);
         }
     }
