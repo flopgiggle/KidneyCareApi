@@ -10,6 +10,8 @@ using Antlr.Runtime.Tree;
 using KidneyCareApi.Dal;
 using KidneyCareApi.Dto;
 using Microsoft.Ajax.Utilities;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using WebGrease.Css.Extensions;
 
 
@@ -57,32 +59,44 @@ namespace KidneyCareApi.Controllers
         /// </summary>
         /// <param name="id">用户Id</param>
         /// <returns></returns>
-        [HttpGet]
-        [Route("getUserInfo/{code}/{openId}")]
-        public ResultPakage<GetUserInfoDto> GetUserInfo(string code, string openId)
+        [HttpPost]
+        [Route("getUserInfo")]
+        public ResultPakage<GetUserInfoDto> GetUserInfo(GetUserInfoParamsDto paramsDto)
         {
             //HttpClient http = new HttpClient();
+            if(paramsDto.OpenId == ""){
+                var http = new HttpHelper();
+                var item = GetHttpItem();
+                item.URL = "https://api.weixin.qq.com/sns/jscode2session?appid=wx941fffa48c073a0d&secret=1b71efd31775ec025045185b951e0296&js_code=" + paramsDto.Code + "&grant_type=authorization_code";
+                item.Method = "get";
+                item.Accept = "image/webp,image/*,*/*;q=0.8";
+                item.ResultType = ResultType.Byte;
+                var result = http.GetHtml(item).Html;
+                var jsonResult = JObject.Parse(result);
+                if (jsonResult["openid"] != null)
+                {
+                    Util.AddLog(new LogInfo() { Describle = "GetUserInfo" + jsonResult["openid"] });
+                    paramsDto.OpenId = jsonResult["openid"].Value<string>();
+                }
+            };
 
-            var http = new HttpHelper();
-            var item = GetHttpItem();
-            item.URL = "https://api.weixin.qq.com/sns/jscode2session?appid=wx941fffa48c073a0d&secret=1b71efd31775ec025045185b951e0296&js_code=" + code + "&grant_type=authorization_code";
-            item.Method = "get";
-            item.Accept = "image/webp,image/*,*/*;q=0.8";
-            item.ResultType = ResultType.Byte;
-            var result = http.GetHtml(item).Html;
+            if (paramsDto.OpenId == "")
+            {
+                return Util.ReturnFailResult<GetUserInfoDto>("未能获取到openid");
+            }
 
             //在微信获取OpenId
             //var openId = openId;
             //根据OpenId获取用户信息
             var db = new Db();
-            var patient = db.Users.First(a => a.OpenId == openId).Patients.First();
-            var user = patient.User;
+            var user = db.Users.FirstOrDefault(a => a.OpenId == paramsDto.OpenId);
+            //var user = patient.User;
             //查询不到信息则返回空用户信息,则创建一个新的用户
             if (user == null)
             {
                 //创建用户账户信息
                 user = new User();
-                user.OpenId = openId;
+                user.OpenId = paramsDto.OpenId;
                 user.CreateTime = DateTime.Now;
                 user.Status = (int)UserStatusType.Registered;
                 db.Users.Add(user);
@@ -100,8 +114,10 @@ namespace KidneyCareApi.Controllers
             returnUserInfo.UserName = user.UserName;
             returnUserInfo.MobilePhone = user.MobilePhone;
             returnUserInfo.IdCard = user.IdCard;
+            returnUserInfo.OpenId = user.OpenId;
             returnUserInfo.Sex = user.Sex;
             returnUserInfo.Status = user.Status.ToString();
+            var patient = db.Users.First(a => a.OpenId == paramsDto.OpenId).Patients.FirstOrDefault();
             if (patient.Doctor != null)
             {
                 returnUserInfo.BelongToDoctorId = patient.Doctor.Id.ToString();

@@ -7,7 +7,7 @@
   <PropertyGroup>
     <TimeStampOfAssociatedLegacyPublishXmlFile />
     <_NewBackgroundProfile>True</_NewBackgroundProfile>
-    <_PublishTargetUrl>c:\users\administrator\documents\visual studio 2017\Projects\KidneyCareApi\KidneyCareApi\bin\Release\PublishOutput</_PublishTargetUrl>
+    <_PublishTargetUrl>F:\小程序开发\KidneyCareApi\KidneyCareApi\bin\Release\PublishOutput</_PublishTargetUrl>
   </PropertyGroup>
   <ItemGroup>
     <File Include="ApplicationInsights.config">
@@ -92,10 +92,10 @@
       <publishTime>09/11/2013 09:10:04</publishTime>
     </File>
     <File Include="bin/KidneyCareApi.dll">
-      <publishTime>08/29/2017 22:56:19</publishTime>
+      <publishTime>09/10/2017 21:14:58</publishTime>
     </File>
     <File Include="bin/KidneyCareApi.pdb">
-      <publishTime>08/29/2017 22:56:19</publishTime>
+      <publishTime>09/10/2017 21:14:58</publishTime>
     </File>
     <File Include="bin/Microsoft.AI.Agent.Intercept.dll">
       <publishTime>11/30/2016 16:07:42</publishTime>
@@ -302,7 +302,7 @@
       <publishTime>08/29/2017 22:30:59</publishTime>
     </File>
     <File Include="packages.config">
-      <publishTime>08/29/2017 22:51:20</publishTime>
+      <publishTime>08/30/2017 00:00:31</publishTime>
     </File>
     <File Include="Scripts/bootstrap.js">
       <publishTime>08/29/2017 22:31:07</publishTime>
@@ -328,6 +328,9 @@
     <File Include="Scripts/respond.min.js">
       <publishTime>08/29/2017 22:31:13</publishTime>
     </File>
+    <File Include="UploadHandler.ashx">
+      <publishTime>09/06/2017 16:38:18</publishTime>
+    </File>
     <File Include="Views/Home/Index.cshtml">
       <publishTime>08/29/2017 22:30:59</publishTime>
     </File>
@@ -344,7 +347,7 @@
       <publishTime>08/29/2017 22:30:59</publishTime>
     </File>
     <File Include="Web.config">
-      <publishTime>08/29/2017 22:56:19</publishTime>
+      <publishTime>09/10/2017 21:14:59</publishTime>
     </File>
   </ItemGroup>
 </Project>

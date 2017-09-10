@@ -71,6 +71,8 @@ namespace KidneyCareApi.Controllers
             item.ResultType = ResultType.Byte;
             var result = http.GetHtml(item).Html;
 
+            Util.AddLog(new LogInfo(){Describle = "code:"+ code+"  result:"+result });
+
             //在微信获取OpenId
             //var openId = openId;
             //根据OpenId获取用户信息

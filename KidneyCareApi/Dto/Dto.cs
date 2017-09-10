@@ -364,8 +364,16 @@ namespace KidneyCareApi.Dto
         public string Id { get; set; }
         public string BelongToNurseId { get; set; }
         public string BelongToDoctorId { get; set; }
+        public string OpenId { get; set; }
         public Patient Patient { get; set; }
-    }                    
+    }
+
+    public class GetUserInfoParamsDto
+    {
+        public string Code { get; set; }
+        public string OpenId { get; set; }
+
+    }
 
     public class MedicalIndicators
     {
