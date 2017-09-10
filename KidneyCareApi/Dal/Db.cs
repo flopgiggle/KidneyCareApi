@@ -8,13 +8,14 @@ namespace KidneyCareApi.Dal
     public partial class Db : DbContext
     {
         public Db()
-            : base("name=Db3")
+            : base("name=Db4")
         {
         }
 
         public virtual DbSet<AuthenCode> AuthenCodes { get; set; }
         public virtual DbSet<DataType> DataTypes { get; set; }
         public virtual DbSet<Doctor> Doctors { get; set; }
+        public virtual DbSet<Feedback> Feedbacks { get; set; }
         public virtual DbSet<Hospital> Hospitals { get; set; }
         public virtual DbSet<IndicatorsRange> IndicatorsRanges { get; set; }
         public virtual DbSet<Message> Messages { get; set; }
@@ -46,6 +47,10 @@ namespace KidneyCareApi.Dal
                 .HasMany(e => e.Patients)
                 .WithOptional(e => e.Doctor)
                 .HasForeignKey(e => e.BelongToDoctor);
+
+            modelBuilder.Entity<Feedback>()
+                .Property(e => e.Message)
+                .IsUnicode(false);
 
             modelBuilder.Entity<Hospital>()
                 .Property(e => e.Name)
@@ -90,6 +95,10 @@ namespace KidneyCareApi.Dal
                 .Property(e => e.Equal)
                 .IsUnicode(false);
 
+            modelBuilder.Entity<IndicatorsRange>()
+                .Property(e => e.Unit)
+                .IsUnicode(false);
+
             modelBuilder.Entity<Message>()
                 .Property(e => e.Messge)
                 .IsUnicode(false);
@@ -98,6 +107,10 @@ namespace KidneyCareApi.Dal
                 .HasMany(e => e.Patients)
                 .WithOptional(e => e.Nurse)
                 .HasForeignKey(e => e.BelongToNurse);
+
+            modelBuilder.Entity<Patient>()
+                .Property(e => e.BindStatus)
+                .IsUnicode(false);
 
             modelBuilder.Entity<PatientsData>()
                 .Property(e => e.DataValue)
@@ -109,6 +122,10 @@ namespace KidneyCareApi.Dal
 
             modelBuilder.Entity<PatientsData>()
                 .Property(e => e.RecordDate)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<PatientsData>()
+                .Property(e => e.Unit)
                 .IsUnicode(false);
 
             modelBuilder.Entity<Report>()
@@ -177,6 +194,10 @@ namespace KidneyCareApi.Dal
 
             modelBuilder.Entity<User>()
                 .Property(e => e.Birthday)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<User>()
+                .Property(e => e.IdCard)
                 .IsUnicode(false);
 
             modelBuilder.Entity<User>()

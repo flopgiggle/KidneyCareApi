@@ -13,6 +13,7 @@ namespace KidneyCareApi.Dal
         public User()
         {
             Doctors = new HashSet<Doctor>();
+            Feedbacks = new HashSet<Feedback>();
             Messages = new HashSet<Message>();
             Messages1 = new HashSet<Message>();
             Nurses = new HashSet<Nurse>();
@@ -44,10 +45,10 @@ namespace KidneyCareApi.Dal
         public string Birthday { get; set; }
 
         [StringLength(255)]
-        public string OpenId { get; set; }
+        public string IdCard { get; set; }
 
         [StringLength(255)]
-        public string IdCard { get; set; }
+        public string OpenId { get; set; }
 
         public int? Status { get; set; }
 
@@ -61,6 +62,9 @@ namespace KidneyCareApi.Dal
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Doctor> Doctors { get; set; }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<Feedback> Feedbacks { get; set; }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Message> Messages { get; set; }

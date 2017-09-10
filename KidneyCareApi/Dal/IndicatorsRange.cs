@@ -22,8 +22,6 @@ namespace KidneyCareApi.Dal
 
         public int? HospitalId { get; set; }
 
-        public int? DataCode { get; set; }
-
         public int? PatientId { get; set; }
 
         public bool? After17 { get; set; }
@@ -36,6 +34,8 @@ namespace KidneyCareApi.Dal
 
         [StringLength(255)]
         public string Unit { get; set; }
+
+        public int? DataCode { get; set; }
 
         public DateTime? CreateTime { get; set; }
 

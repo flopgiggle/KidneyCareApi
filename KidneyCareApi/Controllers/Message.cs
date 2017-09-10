@@ -206,6 +206,29 @@ namespace KidneyCareApi.Controllers
         }
 
         /// <summary>
+        /// 发送消息
+        /// </summary>
+        /// <param name="dto"></param>
+        /// <returns></returns>
+        [HttpPost]
+        //[OpenApi]
+        [Route("sendfeedback")]
+        public ResultPakage<bool> Sendfeedback(SendMssageDto dto)
+        {
+            var db = new Db();
+            Dal.Feedback message = new Dal.Feedback();
+            message.UserId = int.Parse(dto.FromUser);
+            message.Message = dto.Message;
+            message.CreateTime = DateTime.Now;
+
+
+            db.Feedbacks.Add(message);
+            db.SaveChanges();
+            //db.Users.Add(new User(){Doctors = });
+            return Util.ReturnOkResult(true);
+        }
+
+        /// <summary>
         /// 获取消息列表
         /// </summary>
         /// <param name="dto"></param>

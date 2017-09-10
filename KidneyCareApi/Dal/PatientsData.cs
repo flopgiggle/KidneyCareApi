@@ -28,6 +28,9 @@ namespace KidneyCareApi.Dal
 
         public int? ReportId { get; set; }
 
+        [StringLength(255)]
+        public string Unit { get; set; }
+
         public DateTime? CreateTime { get; set; }
 
         public DateTime? UpdateTime { get; set; }
