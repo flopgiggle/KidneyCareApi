@@ -193,6 +193,7 @@
     <Compile Include="Common\Util.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\Record.cs" />
+    <Compile Include="Controllers\Message.cs" />
     <Compile Include="Controllers\UserService.cs" />
     <Compile Include="Controllers\ValuesController.cs" />
     <Compile Include="Dal\AuthenCode.cs" />
@@ -209,7 +210,7 @@
     <Compile Include="Dal\table1.cs" />
     <Compile Include="Dal\table2.cs" />
     <Compile Include="Dal\User.cs" />
-    <Compile Include="Dto\UserDto.cs" />
+    <Compile Include="Dto\Dto.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>

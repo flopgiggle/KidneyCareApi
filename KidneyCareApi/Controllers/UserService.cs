@@ -96,11 +96,20 @@ namespace KidneyCareApi.Controllers
             var returnUserInfo = new GetUserInfoDto();
             returnUserInfo.CreateTime = user.CreateTime?.ToString("yyyy-MM-dd");
             returnUserInfo.Birthday = user.Birthday;
+            returnUserInfo.Id = user.Id.ToString();
             returnUserInfo.UserName = user.UserName;
             returnUserInfo.MobilePhone = user.MobilePhone;
             returnUserInfo.IdCard = user.IdCard;
             returnUserInfo.Sex = user.Sex;
             returnUserInfo.Status = user.Status.ToString();
+            if (patient.Doctor != null)
+            {
+                returnUserInfo.BelongToDoctorId = patient.Doctor.Id.ToString();
+            }
+            if (patient.Nurse != null)
+            {
+                returnUserInfo.BelongToNurseId = patient.Nurse.Id.ToString();
+            }
             Patient returnPatient = new Patient();
             returnUserInfo.Patient = returnPatient;
             returnUserInfo.Patient.BelongToDoctor = patient.BelongToDoctor;
@@ -169,8 +178,8 @@ namespace KidneyCareApi.Controllers
             patient.Hospital = hospital;
             patient.Doctor = doctor;
             patient.Nurse = nurse;
-            patient.BindStatus = (hospital == null ? "1" : "0") + (doctor == null ? "1" : "0") +
-                                 (nurse == null ? "1" : "0");
+            patient.BindStatus = (hospital == null ? "0" : "1") + (doctor == null ? "0" : "1") +
+                                 (nurse == null ? "0" : "1");
             patient.CreateTime = DateTime.Now;
             
 
