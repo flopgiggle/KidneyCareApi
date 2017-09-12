@@ -55,6 +55,108 @@ namespace KidneyCareApi.Controllers
         }
 
         /// <summary>
+        /// 获取OpenId
+        /// </summary>
+        /// <returns></returns>
+        public string GetOpenIdByCode(string code)
+        {
+            string openId = "";
+            var http = new HttpHelper();
+            var item = GetHttpItem();
+            item.URL = "https://api.weixin.qq.com/sns/jscode2session?appid=wx941fffa48c073a0d&secret=1b71efd31775ec025045185b951e0296&js_code=" + code + "&grant_type=authorization_code";
+            item.Method = "get";
+            item.Accept = "image/webp,image/*,*/*;q=0.8";
+            item.ResultType = ResultType.Byte;
+            var result = http.GetHtml(item).Html;
+            var jsonResult = JObject.Parse(result);
+            if (jsonResult["openid"] != null)
+            {
+                Util.AddLog(new LogInfo() { Describle = "GetUserInfo" + jsonResult["openid"] });
+                openId = jsonResult["openid"].Value<string>();
+            }
+            return openId;
+        }
+
+        /// <summary>
+        /// 获取医生端的用户信息
+        /// </summary>
+        /// <param name="id">用户Id</param>
+        /// <returns></returns>
+        [HttpPost]
+        [Route("getUserForMedical")]
+        public ResultPakage<GetUserInfoDto> GetUserForMedical(GetUserInfoParamsDto paramsDto)
+        {
+            //HttpClient http = new HttpClient();
+            if (string.IsNullOrEmpty(paramsDto.OpenId))
+            {
+                paramsDto.OpenId = GetOpenIdByCode(paramsDto.Code);
+            };
+
+            if (string.IsNullOrEmpty(paramsDto.OpenId))
+            {
+                return Util.ReturnFailResult<GetUserInfoDto>("未能获取到openid");
+            }
+
+            //在微信获取OpenId
+            //var openId = openId;
+            //根据OpenId获取用户信息
+            var db = new Db();
+            var user = db.Users.FirstOrDefault(a => a.OpenId == paramsDto.OpenId);
+            //var user = patient.User;
+            //查询不到信息则返回空用户信息,则创建一个新的用户
+            if (user == null)
+            {
+                //创建用户账户信息
+                GetUserInfoDto returndto = new GetUserInfoDto();
+                returndto.OpenId = paramsDto.OpenId;
+                return Util.ReturnOkResult(returndto);
+            }
+            //返回用户信息
+            var returnUserInfo = new GetUserInfoDto();
+            returnUserInfo.CreateTime = user.CreateTime?.ToString("yyyy-MM-dd");
+            returnUserInfo.Birthday = user.Birthday;
+            returnUserInfo.Id = user.Id.ToString();
+            returnUserInfo.UserName = user.UserName;
+            returnUserInfo.MobilePhone = user.MobilePhone;
+            returnUserInfo.IdCard = user.IdCard;
+            returnUserInfo.OpenId = user.OpenId;
+            returnUserInfo.Sex = user.Sex;
+            returnUserInfo.UserType = user.UserType.ToString();
+            returnUserInfo.Status = user.Status.ToString();
+
+            //判定为医生还是护士
+            if ((int)UserType.Doctor == int.Parse(user.UserType.ToString()) )
+            {
+                var doctor = db.Users.First(a => a.OpenId == paramsDto.OpenId).Doctors.FirstOrDefault();
+                Dal.Doctor returnDoctor = new Doctor();
+                returnDoctor.BelongToHospital = doctor.BelongToHospital;
+                returnUserInfo.Doctor = returnDoctor;
+            }
+
+            if ((int)UserType.Nures == int.Parse(user.UserType.ToString()))
+            {
+                var nurse = db.Users.First(a => a.OpenId == paramsDto.OpenId).Nurses.FirstOrDefault();
+                Dal.Nurse returnNurse = new Nurse();
+                returnNurse.BelongToHospital = nurse.BelongToHospital;
+                returnUserInfo.Nurse = returnNurse;
+            }
+
+            return Util.ReturnOkResult(returnUserInfo);
+        }
+
+        [HttpGet]
+        [Route("getPatientInfo/{patientId}/")]
+        public ResultPakage<string> GetPatientInfo(int patientId)
+        {
+            Db db = new Db();
+            var disease = db.PatientsDiseases.Where(a => a.PatientId == patientId).Select(a=>new {a.PatientId,a.DiseaseName,a.DiseaseType,a.DiseaseCode}).ToList();
+            var course = db.PatientsCourses.Where(a => a.PaitentId == patientId).Select(a => new { a.PaitentId, a.CoursCode, a.CoursName }).ToList();
+            var patientBaseInfo = db.Patients.Where(a => a.Id == patientId).Select(a => new {a.CKDLeave}).ToList();
+            var returnObj = new { disease, course, patientBaseInfo };
+            return Util.ReturnOkResult(JsonConvert.SerializeObject(returnObj));
+        }
+
+        /// <summary>
         /// 向腾讯发起请求获取用户唯一openId
         /// </summary>
         /// <param name="id">用户Id</param>
@@ -64,23 +166,12 @@ namespace KidneyCareApi.Controllers
         public ResultPakage<GetUserInfoDto> GetUserInfo(GetUserInfoParamsDto paramsDto)
         {
             //HttpClient http = new HttpClient();
-            if(paramsDto.OpenId == ""){
-                var http = new HttpHelper();
-                var item = GetHttpItem();
-                item.URL = "https://api.weixin.qq.com/sns/jscode2session?appid=wx941fffa48c073a0d&secret=1b71efd31775ec025045185b951e0296&js_code=" + paramsDto.Code + "&grant_type=authorization_code";
-                item.Method = "get";
-                item.Accept = "image/webp,image/*,*/*;q=0.8";
-                item.ResultType = ResultType.Byte;
-                var result = http.GetHtml(item).Html;
-                var jsonResult = JObject.Parse(result);
-                if (jsonResult["openid"] != null)
-                {
-                    Util.AddLog(new LogInfo() { Describle = "GetUserInfo" + jsonResult["openid"] });
-                    paramsDto.OpenId = jsonResult["openid"].Value<string>();
-                }
+            if(string.IsNullOrEmpty(paramsDto.OpenId))
+            {
+                paramsDto.OpenId = GetOpenIdByCode(paramsDto.Code);
             };
 
-            if (paramsDto.OpenId == "")
+            if (string.IsNullOrEmpty(paramsDto.OpenId))
             {
                 return Util.ReturnFailResult<GetUserInfoDto>("未能获取到openid");
             }
@@ -221,30 +312,44 @@ namespace KidneyCareApi.Controllers
             if (db.Users.Any(a => a.OpenId == dto.OpenId))
                 return Util.ReturnFailResult<bool>("用户已存在");
 
-            var doctor = db.Doctors.First(a => a.Id == dto.BelongToDoctor);
-            var nurse = db.Nurses.First(a => a.Id == dto.BelongToNurse);
-            var hospital = db.Hospitals.First(a => a.Id == dto.BelongToHospital);
+            //var doctor = db.Doctors.First(a => a.Id == dto.BelongToDoctor);
+            //var nurse = db.Nurses.First(a => a.Id == dto.BelongToNurse);
+            //var hospital = db.Hospitals.First(a => a.Id == dto.BelongToHospital);
 
             //创建用户
             var user = new User();
-            user.Birthday = dto.Birthday;
             user.CreateTime = DateTime.Now;
             user.OpenId = dto.OpenId;
             user.MobilePhone = dto.MobilePhone;
             user.Sex = dto.Sex;
             user.Status = (int)UserStatusType.Registered;
             user.OpenId = dto.OpenId;
-            user.IdCard = dto.IdCard;
+            user.UserType = (sbyte)dto.UserType;
+            //user.IdCard = dto.IdCard;
             user.UserName = dto.UserName;
-
-            var patient = new Patient();
-            patient.User = user;
-            patient.Hospital = hospital;
-            patient.Doctor = doctor;
-            patient.CreateTime = DateTime.Now;
-
             db.Users.Add(user);
-            db.Patients.Add(patient);
+
+            //判定为医生还是护士
+            if ((int)UserType.Doctor == int.Parse(dto.UserType.ToString()))
+            {
+                Dal.Doctor newDoctor = new Doctor();
+                newDoctor.BelongToHospital = dto.BelongToHospital;
+                newDoctor.JobTitle = dto.JobTitle;
+                newDoctor.UserId = user.Id;
+                newDoctor.CreateTime = DateTime.Now;
+                db.Doctors.Add(newDoctor);
+            }
+
+            if ((int)UserType.Nures == int.Parse(dto.UserType.ToString()))
+            {
+                Dal.Nurse newNurse = new Nurse();
+                newNurse.BelongToHospital = dto.BelongToHospital;
+                newNurse.JobTitle = dto.JobTitle;
+                newNurse.UserId = user.Id;
+                newNurse.CreateTime = DateTime.Now;
+                db.Nurses.Add(newNurse);
+
+            }
             db.SaveChanges();
 
             //db.Users.Add(new User(){Doctors = });
@@ -279,6 +384,27 @@ namespace KidneyCareApi.Controllers
         private string GetNameByReportType(int reportType)
         {
             return ((ReportType)reportType).GetEnumDes();
+        }
+
+        [HttpPost]
+        [Route("getPatientList")]
+        public ResultPakage<string> GetPatientList(GetPatientListParamsDto paramsDto)
+        {
+
+
+            Db db = new Db();
+            var patients = db.Patients.Where(a => (a.Doctor.User.Id == paramsDto.UserId || a.Nurse.User.Id == paramsDto.UserId))
+                .Select(a => new
+                    {
+                        a.User.Id,
+                        a.User.Sex,
+                        a.User.Birthday,
+                        a.User.UserName,
+                        a.CKDLeave,
+                        disases = a.PatientsDiseases.Select(b => new {b.DiseaseType, b.DiseaseName})
+                    }
+                ).ToList();
+            return Util.ReturnOkResult(JsonConvert.SerializeObject(patients));
         }
 
         /// <summary>

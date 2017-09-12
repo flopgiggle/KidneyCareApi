@@ -21,6 +21,8 @@ namespace KidneyCareApi.Dal
 
         public int? BelongToHospital { get; set; }
 
+        public int? JobTitle { get; set; }
+
         public DateTime? CreateTime { get; set; }
 
         public DateTime? UpdateTime { get; set; }

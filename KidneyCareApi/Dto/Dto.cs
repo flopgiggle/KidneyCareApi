@@ -67,6 +67,31 @@ namespace KidneyCareApi.Dto
         public string UserName { get; set; }
         public string Password { get; set; }
     }
+
+    /// <summary>
+    /// User显示实体
+    /// </summary>
+    public enum UserType
+    {
+        /// <summary>
+        /// 普通患者
+        /// </summary>
+        [Description("普通患者")]
+        Patient = 1,
+
+        /// <summary>
+        /// 医生
+        /// </summary>
+        [Description("医生")]
+        Doctor = 2,
+
+        /// <summary>
+        /// 护士
+        /// </summary>
+        [Description("护士")]
+        Nures = 3,
+    }
+
     /// <summary>
     /// 用户注册
     /// </summary>
@@ -92,6 +117,7 @@ namespace KidneyCareApi.Dto
         public string OpenId { get; set; }
         public string CKDLeave { get; set; }
         public string DiseaseType { get; set; }
+        public int JobTitle { get; set; }
     }
 
     public class GetMessageReturnDto
@@ -119,6 +145,17 @@ namespace KidneyCareApi.Dto
         public virtual User User1 { get; set; }
 
         public int UserType { get; set; }
+    }
+
+    /// <summary>
+    /// 获取病人列表查询条件
+    /// </summary>
+    public class GetPatientListParamsDto
+    {
+        public int UserId { get; set; }
+        public string UserType { get; set; }
+        public string PageIndex { get; set; }
+        public string PageSize { get; set; }
     }
 
     public class MyRecordDto
@@ -227,6 +264,63 @@ namespace KidneyCareApi.Dto
         /// </summary>
         [Description("完成绑定医院医护信息")]
         CompleteBinding = 2,
+    }
+
+    public enum JobTitleType
+    {
+        /// <summary>
+        /// 住院医师
+        /// </summary>
+        [Description("住院医师")]
+        ResidentDoctor = 1,
+
+        /// <summary>
+        /// 主治医师
+        /// </summary>
+        [Description("主治医师")]
+        AttendingPhysician = 2,
+
+        /// <summary>
+        /// 副主任医师
+        /// </summary>
+        [Description("副主任医师")]
+        AssociateChiefPhysician = 3,
+
+        /// <summary>
+        ///     主任医师
+        /// </summary>
+        [Description("主任医师")]
+        ChiefPhysician = 4,
+
+        /// <summary>
+        ///     初级护士
+        /// </summary>
+        [Description("初级护士")]
+        ThePrimaryNurse = 10,
+
+        /// <summary>
+        ///     初级护师
+        /// </summary>
+        [Description("初级护师")]
+        ThePrimaryNursePractitioner = 11,
+
+        /// <summary>
+        ///     主管护师
+        /// </summary>
+        [Description("主管护师")]
+        IurseInCharge = 12,
+
+        /// <summary>
+        ///     副主任护师
+        /// </summary>
+        [Description("副主任护师")]
+        CoChiefSuperintendentNurse = 13,
+
+        /// <summary>
+        ///     主任护师
+        /// </summary>
+        [Description("主任护师")]
+        ChiefSuperintendentNurse = 14,
     }
 
     public enum PatientsDataType
@@ -364,15 +458,21 @@ namespace KidneyCareApi.Dto
         public string Id { get; set; }
         public string BelongToNurseId { get; set; }
         public string BelongToDoctorId { get; set; }
+        public string UserType { get; set; }
         public string OpenId { get; set; }
         public Patient Patient { get; set; }
+        public Doctor Doctor { get; set; }
+        public Nurse Nurse { get; set; }
     }
 
     public class GetUserInfoParamsDto
     {
         public string Code { get; set; }
         public string OpenId { get; set; }
-
+        /// <summary>
+        /// 客户端类型，判定请求是来自，患者端还是医生端
+        /// </summary>
+        public string ClientType { get; set; }
     }
 
     public class MedicalIndicators

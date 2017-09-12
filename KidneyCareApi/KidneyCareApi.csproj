@@ -210,6 +210,7 @@
     <Compile Include="Dal\Nurse.cs" />
     <Compile Include="Dal\Patient.cs" />
     <Compile Include="Dal\PatientsData.cs" />
+    <Compile Include="Dal\PatientsDisease.cs" />
     <Compile Include="Dal\Report.cs" />
     <Compile Include="Dal\table1.cs" />
     <Compile Include="Dal\table2.cs" />

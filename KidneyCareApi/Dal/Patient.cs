@@ -13,7 +13,9 @@ namespace KidneyCareApi.Dal
         public Patient()
         {
             IndicatorsRanges = new HashSet<IndicatorsRange>();
+            PatientsCourses = new HashSet<PatientsCourse>();
             PatientsDatas = new HashSet<PatientsData>();
+            PatientsDiseases = new HashSet<PatientsDisease>();
             Reports = new HashSet<Report>();
         }
 
@@ -54,7 +56,13 @@ namespace KidneyCareApi.Dal
         public virtual User User { get; set; }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<PatientsCourse> PatientsCourses { get; set; }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<PatientsData> PatientsDatas { get; set; }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<PatientsDisease> PatientsDiseases { get; set; }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Report> Reports { get; set; }
