@@ -77,6 +77,8 @@ namespace KidneyCareApi.Controllers
             return openId;
         }
 
+        
+
         /// <summary>
         /// 获取医生端的用户信息
         /// </summary>
@@ -145,13 +147,13 @@ namespace KidneyCareApi.Controllers
         }
 
         [HttpGet]
-        [Route("getPatientInfo/{patientId}/")]
+        [Route("getPatientInfo/{patientId}")]
         public ResultPakage<string> GetPatientInfo(int patientId)
         {
             Db db = new Db();
             var disease = db.PatientsDiseases.Where(a => a.PatientId == patientId).Select(a=>new {a.PatientId,a.DiseaseName,a.DiseaseType,a.DiseaseCode}).ToList();
             var course = db.PatientsCourses.Where(a => a.PaitentId == patientId).Select(a => new { a.PaitentId, a.CoursCode, a.CoursName }).ToList();
-            var patientBaseInfo = db.Patients.Where(a => a.Id == patientId).Select(a => new {a.CKDLeave}).ToList();
+            var patientBaseInfo = db.Patients.Where(a => a.Id == patientId).Select(a => new {a.CKDLeave}).FirstOrDefault();
             var returnObj = new { disease, course, patientBaseInfo };
             return Util.ReturnOkResult(JsonConvert.SerializeObject(returnObj));
         }
@@ -401,10 +403,36 @@ namespace KidneyCareApi.Controllers
                         a.User.Birthday,
                         a.User.UserName,
                         a.CKDLeave,
-                        disases = a.PatientsDiseases.Select(b => new {b.DiseaseType, b.DiseaseName})
+                        patientId =a.Id,
+                        //disases = a.PatientsDiseases.Select(b => new {b.DiseaseType, b.DiseaseName})
                     }
                 ).ToList();
             return Util.ReturnOkResult(JsonConvert.SerializeObject(patients));
+        }
+
+        [HttpPost]
+        [Route("updatePatientDisease")]
+        public ResultPakage<bool> UpdatePatientDisease(UpdatePatientDisease patientDto)
+        {
+            //var dto = JObject.Parse(paramsDto);
+            Db db = new Db();
+            var patient = db.Patients.FirstOrDefault(a => a.Id == patientDto.PatientId);
+            patient.CKDLeave = patientDto.CDKLeave;
+            //删除原有的疾病
+            db.PatientsDiseases.RemoveRange(patient.PatientsDiseases);
+            //新建疾病
+            patientDto.Disease.ForEach(a =>
+            {
+                Dal.PatientsDisease pd = new PatientsDisease();
+                pd.DiseaseCode = a.DiseaseCode;
+                pd.DiseaseType = a.DiseaseType;
+                pd.DiseaseName = a.DiseaseName;
+                pd.PatientId = patientDto.PatientId;
+                pd.CreateTime = DateTime.Now;
+                db.PatientsDiseases.Add(pd);
+            });
+            db.SaveChanges();
+            return Util.ReturnOkResult(true);
         }
 
         /// <summary>
@@ -585,14 +613,17 @@ namespace KidneyCareApi.Controllers
             }
         }
 
-        /// <summary>
-        /// 查询报告历史记录
-        /// </summary>
-        /// <param name="dto"></param>
-        /// <returns></returns>
+
         [HttpGet]
-        [Route("getReportHistory/{year}/{openId}")]
-        public ResultPakage<ReportAndHistoryReturnDto> GetReportHistory(string year, string openId)
+        [Route("getReportHistoryByPatientId/{year}/{patientId}")]
+        public ResultPakage<ReportAndHistoryReturnDto> GetReportHistoryByPatientId(string year, int patientId)
+        {
+            Db db = new Db();
+            var patient = db.Patients.FirstOrDefault(a => a.Id == patientId);
+            return GetReportByPatient(year,patient);
+        }
+
+        public ResultPakage<ReportAndHistoryReturnDto> GetReportByPatient(string year, Dal.Patient patient)
         {
             var db = new Db();
             var reportAndHistoryReturnDto = new ReportAndHistoryReturnDto();
@@ -608,8 +639,6 @@ namespace KidneyCareApi.Controllers
             var startDate = year + "-" + "01" + "-" + "01";
             var endDate = year + "-" + "12" + "-" + "31";
             //查询病人历史的数据
-            //根据openid 查询病人信息
-            var patient = db.Users.First(a => a.OpenId == openId).Patients.First();
             //病人当年的所有的报告信息
             var reportData = db.Reports.Where(a => a.ReportDate.CompareTo(startDate) > 0 && a.ReportDate.CompareTo(endDate) < 0 && a.PatientId == patient.Id).Select(a => new { a.CreateTime, a.ReportType, a.ReportDate, a.ImageUrl }).ToList();
 
@@ -646,13 +675,13 @@ namespace KidneyCareApi.Controllers
                 var Xxdata = new List<string>();
                 var Values = new List<string>();
                 a.OrderBy(b => b.RecordTime).ForEach(item =>
-                  {
-                      Xxdata.Add(item.RecordDate);
-                      Values.Add(item.DataValue);
-                      historyDto.Name = GetNameByCode(item.DataCode ?? 9);
-                      historyDto.UnitName = "待定";
-                      historyDto.DataCode = "code" + item.DataCode;
-                  });
+                {
+                    Xxdata.Add(item.RecordDate);
+                    Values.Add(item.DataValue);
+                    historyDto.Name = GetNameByCode(item.DataCode ?? 9);
+                    historyDto.UnitName = "待定";
+                    historyDto.DataCode = "code" + item.DataCode;
+                });
                 historyDto.Values = Values;
                 historyDto.Xdata = Xxdata;
                 reportHistoryReturnDtos.Add(historyDto);
@@ -661,24 +690,37 @@ namespace KidneyCareApi.Controllers
             return Util.ReturnOkResult(reportAndHistoryReturnDto);
         }
 
-
         /// <summary>
-        /// 查询最近7天的每日记录历史
+        /// 查询报告历史记录
         /// </summary>
         /// <param name="dto"></param>
         /// <returns></returns>
         [HttpGet]
-        [Route("getMyRecordHistory/{days}/{openId}")]
-        public ResultPakage<GetMyRecordHistoryDto> GetMyRecordHistory(string days, string openId)
+        [Route("getReportHistory/{year}/{openId}")]
+        public ResultPakage<ReportAndHistoryReturnDto> GetReportHistory(string year, string openId)
+        {
+            var db = new Db();
+            var patient = db.Users.First(a => a.OpenId == openId).Patients.First();
+            return GetReportByPatient(year, patient);
+        }
+
+        #region 病人自我记录历史
+
+        [HttpGet]
+        [Route("getMyRecordHistoryByPatientId/{days}/{patientId}")]
+        public ResultPakage<GetMyRecordHistoryDto> GetMyRecordHistoryByPatientId(string days, int patientId)
+        {
+            Db db = new Db();
+            var patient = db.Patients.FirstOrDefault(a => a.Id == patientId);
+            return GetMyRecordHistoryByPaitient(patient);
+        }
+
+        private ResultPakage<GetMyRecordHistoryDto> GetMyRecordHistoryByPaitient(Dal.Patient patient)
         {
             var db = new Db();
             var dto = new GetMyRecordHistoryDto();
             //查询当前日期7天之内的数据
             var startDate = DateTime.Now.AddDays(-7).ToString("yyyy-MM-dd");
-
-            //查询病人历史的数据
-            //根据openid 查询病人信息
-            var patient = db.Users.First(a => a.OpenId == openId).Patients.First();
 
             //病人最近7天的所有的报告信息,每天只取一个记录，且该记录为一天中最新的一个
             var reportDetailDatas = db.PatientsDatas.Where(a => a.PatientId == patient.Id && a.ReportId == null && a.RecordDate.CompareTo(startDate) > 0)
@@ -760,5 +802,29 @@ namespace KidneyCareApi.Controllers
                 dto.RandomBloodGlucose.Add("0");
             return Util.ReturnOkResult(dto);
         }
+
+        /// <summary>
+        /// 查询最近7天的每日记录历史
+        /// </summary>
+        /// <param name="dto"></param>
+        /// <returns></returns>
+        [HttpGet]
+        [Route("getMyRecordHistory/{days}/{openId}")]
+        public ResultPakage<GetMyRecordHistoryDto> GetMyRecordHistory(string days, string openId)
+        {
+
+            var db = new Db();
+            //查询病人历史的数据
+            //根据openid 查询病人信息
+            var patient = db.Users.First(a => a.OpenId == openId).Patients.First();
+
+            return GetMyRecordHistoryByPaitient(patient);
+
+
+        }
+
+        #endregion
+
+
     }
 }

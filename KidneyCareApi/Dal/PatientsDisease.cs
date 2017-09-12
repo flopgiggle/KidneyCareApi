@@ -13,7 +13,8 @@ namespace KidneyCareApi.Dal
 
         public int? PatientId { get; set; }
 
-        public int? DiseaseType { get; set; }
+        [StringLength(255)]
+        public string DiseaseType { get; set; }
 
         public int? DiseaseCode { get; set; }
 

@@ -567,6 +567,13 @@ namespace KidneyCareApi.Dto
 
     }
 
+    public class UpdatePatientDisease
+    {
+        public int CDKLeave { get; set; }
+        public List<Dal.PatientsDisease> Disease { get; set; }
+        public int PatientId { get; set; }
+    }
+
     public enum PatientsDataFormType
     {
         /// <summary>
