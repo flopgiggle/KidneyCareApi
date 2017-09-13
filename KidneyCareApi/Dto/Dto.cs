@@ -48,8 +48,8 @@ namespace KidneyCareApi.Dto
     public class SendMssageDto
     {
         public string Message;
-        public string FromUser;
-        public string ToUser;
+        public int FromUser;
+        public int ToUser;
     }
 
     public class AddPatientCourseEvaluateParamsDto
@@ -122,7 +122,7 @@ namespace KidneyCareApi.Dto
         //public bool? IsDelete { get; set; }
         //public string AuthenCode { get; set; }
 
-
+        public int UserId { get; set; }
         public string UserName { get; set; }
         public string MobilePhone { get; set; }
         public string Birthday { get; set; }
@@ -136,6 +136,7 @@ namespace KidneyCareApi.Dto
         public string CKDLeave { get; set; }
         public string DiseaseType { get; set; }
         public int JobTitle { get; set; }
+        public string Profile { get; set; }
     }
 
     public class GetMessageReturnDto
@@ -174,6 +175,7 @@ namespace KidneyCareApi.Dto
         public string UserType { get; set; }
         public string PageIndex { get; set; }
         public string PageSize { get; set; }
+        public string Age { get; set; }
     }
 
     public class MyRecordDto
@@ -478,6 +480,9 @@ namespace KidneyCareApi.Dto
         public string BelongToDoctorId { get; set; }
         public string UserType { get; set; }
         public string OpenId { get; set; }
+        public string Duty { get; set; }
+        public int JobTitle { get; set; }
+        public string Profile { get; set; }
         public Patient Patient { get; set; }
         public Doctor Doctor { get; set; }
         public Nurse Nurse { get; set; }

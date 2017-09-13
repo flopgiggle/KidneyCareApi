@@ -195,8 +195,15 @@ namespace KidneyCareApi.Controllers
         {
             var db = new Db();
             Dal.Message message = new Dal.Message();
-            message.ToUser = int.Parse(dto.ToUser);
-            message.FromUser = int.Parse(dto.FromUser);
+
+            //检查用户角色，如果为医生，则需要转换touser为患者用户id
+            var usertype = db.Users.Where(a => a.Id == dto.FromUser).FirstOrDefault().UserType;
+            if ((int) UserType.Nures == usertype || (int) UserType.Doctor == usertype)
+            {
+                message.ToUser = db.Patients.Where(a => a.Id == dto.ToUser).Select(a => a.UserId).FirstOrDefault();
+            }
+            message.ToUser = dto.ToUser;
+            message.FromUser = dto.FromUser;
             message.Messge = dto.Message;
             message.CreateTime = DateTime.Now;
             message.IsRead = false;
@@ -219,7 +226,7 @@ namespace KidneyCareApi.Controllers
         {
             var db = new Db();
             Dal.Feedback message = new Dal.Feedback();
-            message.UserId = int.Parse(dto.FromUser);
+            message.UserId = dto.FromUser;
             message.Message = dto.Message;
             message.CreateTime = DateTime.Now;
 

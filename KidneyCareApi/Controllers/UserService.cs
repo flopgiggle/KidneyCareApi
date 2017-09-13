@@ -133,6 +133,7 @@ namespace KidneyCareApi.Controllers
                 Dal.Doctor returnDoctor = new Doctor();
                 returnDoctor.BelongToHospital = doctor.BelongToHospital;
                 returnUserInfo.Doctor = returnDoctor;
+                returnUserInfo.JobTitle = doctor.JobTitle??1;
             }
 
             if ((int)UserType.Nures == int.Parse(user.UserType.ToString()))
@@ -141,6 +142,7 @@ namespace KidneyCareApi.Controllers
                 Dal.Nurse returnNurse = new Nurse();
                 returnNurse.BelongToHospital = nurse.BelongToHospital;
                 returnUserInfo.Nurse = returnNurse;
+                returnUserInfo.JobTitle = nurse.JobTitle ?? 1;
             }
 
             return Util.ReturnOkResult(returnUserInfo);
@@ -299,6 +301,19 @@ namespace KidneyCareApi.Controllers
             return Util.ReturnOkResult(true);
         }
 
+        [HttpPost]
+        //[OpenApi]
+        [Route("updateProfile")]
+        public ResultPakage<bool> UpdateProfile(UserRegistDto dto)
+        {
+            var db = new Db();
+            var user = db.Users.FirstOrDefault(a => a.Id == dto.UserId);
+            user.Profile = dto.Profile;
+            db.SaveChanges();
+            return Util.ReturnOkResult(true);
+        }
+
+
         /// <summary>
         /// 注册
         /// </summary>
@@ -310,6 +325,9 @@ namespace KidneyCareApi.Controllers
         public ResultPakage<bool> Regist(UserRegistDto dto)
         {
             var db = new Db();
+            
+            
+
             //检查此用户是否已存在
             if (db.Users.Any(a => a.OpenId == dto.OpenId))
                 return Util.ReturnFailResult<bool>("用户已存在");
@@ -404,6 +422,7 @@ namespace KidneyCareApi.Controllers
                         a.User.UserName,
                         a.CKDLeave,
                         patientId =a.Id,
+                        age= ""
                         //disases = a.PatientsDiseases.Select(b => new {b.DiseaseType, b.DiseaseName})
                     }
                 ).ToList();

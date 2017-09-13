@@ -24,7 +24,8 @@ namespace KidneyCareApi.Dal
 
         [StringLength(255)]
         public string UserName { get; set; }
-
+        [StringLength(2000)]
+        public string  Profile { get; set; }
         [StringLength(255)]
         public string Password { get; set; }
 
