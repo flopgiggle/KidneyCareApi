@@ -52,6 +52,24 @@ namespace KidneyCareApi.Dto
         public string ToUser;
     }
 
+    public class AddPatientCourseEvaluateParamsDto
+    {
+        public int PatientId;
+        public string CoursCode;
+        public string CoursName;
+        public string CoursStatus;
+        public string AttendingDates;
+        public int ObjectCode;
+        public string ObjectName;
+        public int ModeCode;
+        public string ModeName;
+        public int CognitionCode;
+        public string CognitionName;
+        public int BehaviorCode;
+        public string BehaviorName;
+        public string Mark;
+    }
+
     public class GetMssageDto
     {
         public string Index;
