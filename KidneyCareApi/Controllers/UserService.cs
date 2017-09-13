@@ -77,7 +77,7 @@ namespace KidneyCareApi.Controllers
             return openId;
         }
 
-        
+
 
         /// <summary>
         /// 获取医生端的用户信息
@@ -127,13 +127,13 @@ namespace KidneyCareApi.Controllers
             returnUserInfo.Status = user.Status.ToString();
 
             //判定为医生还是护士
-            if ((int)UserType.Doctor == int.Parse(user.UserType.ToString()) )
+            if ((int)UserType.Doctor == int.Parse(user.UserType.ToString()))
             {
                 var doctor = db.Users.First(a => a.OpenId == paramsDto.OpenId).Doctors.FirstOrDefault();
                 Dal.Doctor returnDoctor = new Doctor();
                 returnDoctor.BelongToHospital = doctor.BelongToHospital;
                 returnUserInfo.Doctor = returnDoctor;
-                returnUserInfo.JobTitle = doctor.JobTitle??1;
+                returnUserInfo.JobTitle = doctor.JobTitle ?? 1;
             }
 
             if ((int)UserType.Nures == int.Parse(user.UserType.ToString()))
@@ -153,9 +153,9 @@ namespace KidneyCareApi.Controllers
         public ResultPakage<string> GetPatientInfo(int patientId)
         {
             Db db = new Db();
-            var disease = db.PatientsDiseases.Where(a => a.PatientId == patientId).Select(a=>new {a.PatientId,a.DiseaseName,a.DiseaseType,a.DiseaseCode}).ToList();
+            var disease = db.PatientsDiseases.Where(a => a.PatientId == patientId).Select(a => new { a.PatientId, a.DiseaseName, a.DiseaseType, a.DiseaseCode }).ToList();
             var course = db.PatientsCourses.Where(a => a.PaitentId == patientId).Select(a => new { a.PaitentId, a.CoursCode, a.CoursName }).ToList();
-            var patientBaseInfo = db.Patients.Where(a => a.Id == patientId).Select(a => new {a.CKDLeave}).FirstOrDefault();
+            var patientBaseInfo = db.Patients.Where(a => a.Id == patientId).Select(a => new { a.CKDLeave }).FirstOrDefault();
             var returnObj = new { disease, course, patientBaseInfo };
             return Util.ReturnOkResult(JsonConvert.SerializeObject(returnObj));
         }
@@ -170,7 +170,7 @@ namespace KidneyCareApi.Controllers
         public ResultPakage<GetUserInfoDto> GetUserInfo(GetUserInfoParamsDto paramsDto)
         {
             //HttpClient http = new HttpClient();
-            if(string.IsNullOrEmpty(paramsDto.OpenId))
+            if (string.IsNullOrEmpty(paramsDto.OpenId))
             {
                 paramsDto.OpenId = GetOpenIdByCode(paramsDto.Code);
             };
@@ -292,7 +292,7 @@ namespace KidneyCareApi.Controllers
             patient.BindStatus = (hospital == null ? "0" : "1") + (doctor == null ? "0" : "1") +
                                  (nurse == null ? "0" : "1");
             patient.CreateTime = DateTime.Now;
-            
+
 
             db.SaveChanges();
 
@@ -325,8 +325,8 @@ namespace KidneyCareApi.Controllers
         public ResultPakage<bool> Regist(UserRegistDto dto)
         {
             var db = new Db();
-            
-            
+
+
 
             //检查此用户是否已存在
             if (db.Users.Any(a => a.OpenId == dto.OpenId))
@@ -415,16 +415,16 @@ namespace KidneyCareApi.Controllers
             Db db = new Db();
             var patients = db.Patients.Where(a => (a.Doctor.User.Id == paramsDto.UserId || a.Nurse.User.Id == paramsDto.UserId))
                 .Select(a => new
-                    {
-                        a.User.Id,
-                        a.User.Sex,
-                        a.User.Birthday,
-                        a.User.UserName,
-                        a.CKDLeave,
-                        patientId =a.Id,
-                        age= ""
-                        //disases = a.PatientsDiseases.Select(b => new {b.DiseaseType, b.DiseaseName})
-                    }
+                {
+                    a.User.Id,
+                    a.User.Sex,
+                    a.User.Birthday,
+                    a.User.UserName,
+                    a.CKDLeave,
+                    patientId = a.Id,
+                    age = ""
+                    //disases = a.PatientsDiseases.Select(b => new {b.DiseaseType, b.DiseaseName})
+                }
                 ).ToList();
             return Util.ReturnOkResult(JsonConvert.SerializeObject(patients));
         }
@@ -529,7 +529,7 @@ namespace KidneyCareApi.Controllers
                 a.ForEach(item =>
                 {
                     var oneReturnDto = new CurrentInfoListDto(); var diastolicPressureValue = "";
-                    
+
                     //如果类型为舒张压,则直接跳过
                     if (item.DataCode != (int)PatientsDataType.DiastolicPressure)
                     {
@@ -544,17 +544,17 @@ namespace KidneyCareApi.Controllers
                             oneReturnDto.DataName = GetNameByCode(item.DataCode ?? 9);
                         //判定指标是否正确
                         IndicatorJudge(indicators, oneReturnDto);
-                        
+
                     }
 
                     //如果类型为收缩压,则找出对应的舒张压，并把舒张压放入收缩压返回值,并设置名称为血压
-                    if (item.DataCode == (int) PatientsDataType.SystolicPressure)
+                    if (item.DataCode == (int)PatientsDataType.SystolicPressure)
                     {
                         //查找对应的舒张压
-                        var diastolicPressure = a.FirstOrDefault(x => x.DataCode == (int) PatientsDataType.DiastolicPressure);
+                        var diastolicPressure = a.FirstOrDefault(x => x.DataCode == (int)PatientsDataType.DiastolicPressure);
                         if (diastolicPressure != null)
                         {
-                            oneReturnDto.DataValue = item.DataValue +"/"+ diastolicPressure.DataValue;
+                            oneReturnDto.DataValue = item.DataValue + "/" + diastolicPressure.DataValue;
                         }
                         //对舒张压值进行判定比较
                         var diastolicPressureDto = new CurrentInfoListDto();
@@ -567,7 +567,7 @@ namespace KidneyCareApi.Controllers
 
                     }
 
-                    if (item.DataCode != (int) PatientsDataType.DiastolicPressure)
+                    if (item.DataCode != (int)PatientsDataType.DiastolicPressure)
                     {
                         MyRecordList.Add(oneReturnDto);
                     }
@@ -680,6 +680,31 @@ namespace KidneyCareApi.Controllers
             }).ToList();
 
             return Util.ReturnOkResult(JsonConvert.SerializeObject(courses));
+        }
+
+        [HttpGet]
+        [Route("getStaffsByHosptalId/{hospitalId}")]
+        public ResultPakage<string> GetStaffsByHosptalId(int hospitalId)
+        {
+            Db db = new Db();
+            var allDoctors = db.Doctors.Where(a => a.BelongToHospital == hospitalId)
+                .Select(a => new { UserName = a.User.UserName, Id = a.Id });
+
+            var allNurses = db.Nurses.Where(a => a.BelongToHospital == hospitalId)
+                .Select(a => new { UserName = a.User.UserName, Id = a.Id });
+
+            return Util.ReturnOkResult(JsonConvert.SerializeObject(new { allDoctors, allNurses }));
+        }
+
+        [HttpGet]
+        [Route("getHospitalSelectInfo/{province}/{city}")]
+        public ResultPakage<string> getHospitalSelectInfo(string province,string city)
+        {
+            Db db = new Db();
+            var provinces = db.Provinces.Where(a=>a.ProvinceName=="四川省").Select(a => new {Name = a.ProvinceName,Id=a.ProvinceCode}).ToList();
+            var citys = db.Cities.Where(a =>(a.CityName=="成都市"||a.CityName=="绵阳市") && a.ProvinceCode == province).Select(a => new { Name = a.CityName, Id = a.CityCode }).ToList();
+            var hospital = db.Hospitals.Where(a => a.CityCode == city).Select(a => new {Name = a.Name, Id = a.Id}).ToList();
+            return Util.ReturnOkResult(JsonConvert.SerializeObject(new { provinces, citys, hospital }));
         }
 
         #region 历史记录--病人自我记录

@@ -8,11 +8,13 @@ namespace KidneyCareApi.Dal
     public partial class Db : DbContext
     {
         public Db()
-            : base("name=Db7")
+            : base("name=Db10")
         {
         }
 
+        public virtual DbSet<Area> Areas { get; set; }
         public virtual DbSet<AuthenCode> AuthenCodes { get; set; }
+        public virtual DbSet<City> Cities { get; set; }
         public virtual DbSet<DataType> DataTypes { get; set; }
         public virtual DbSet<Doctor> Doctors { get; set; }
         public virtual DbSet<Feedback> Feedbacks { get; set; }
@@ -24,17 +26,43 @@ namespace KidneyCareApi.Dal
         public virtual DbSet<PatientsCourse> PatientsCourses { get; set; }
         public virtual DbSet<PatientsData> PatientsDatas { get; set; }
         public virtual DbSet<PatientsDisease> PatientsDiseases { get; set; }
+        public virtual DbSet<Province> Provinces { get; set; }
         public virtual DbSet<Report> Reports { get; set; }
         public virtual DbSet<User> Users { get; set; }
+        public virtual DbSet<ZipCode> ZipCodes { get; set; }
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<Area>()
+                .Property(e => e.AreaCode)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Area>()
+                .Property(e => e.AreaName)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Area>()
+                .Property(e => e.CityCode)
+                .IsUnicode(false);
+
             modelBuilder.Entity<AuthenCode>()
                 .Property(e => e.PhoneNum)
                 .IsUnicode(false);
 
             modelBuilder.Entity<AuthenCode>()
                 .Property(e => e.AuthenCode1)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<City>()
+                .Property(e => e.CityCode)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<City>()
+                .Property(e => e.CityName)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<City>()
+                .Property(e => e.ProvinceCode)
                 .IsUnicode(false);
 
             modelBuilder.Entity<DataType>()
@@ -179,6 +207,14 @@ namespace KidneyCareApi.Dal
                 .Property(e => e.DiseaseStartTime)
                 .IsUnicode(false);
 
+            modelBuilder.Entity<Province>()
+                .Property(e => e.ProvinceCode)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Province>()
+                .Property(e => e.ProvinceName)
+                .IsUnicode(false);
+
             modelBuilder.Entity<Report>()
                 .Property(e => e.ReportDate)
                 .IsUnicode(false);
@@ -256,6 +292,10 @@ namespace KidneyCareApi.Dal
                 .IsUnicode(false);
 
             modelBuilder.Entity<User>()
+                .Property(e => e.Profile)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<User>()
                 .HasMany(e => e.Messages)
                 .WithOptional(e => e.User)
                 .HasForeignKey(e => e.FromUser);
@@ -264,6 +304,18 @@ namespace KidneyCareApi.Dal
                 .HasMany(e => e.Messages1)
                 .WithOptional(e => e.User1)
                 .HasForeignKey(e => e.ToUser);
+
+            modelBuilder.Entity<ZipCode>()
+                .Property(e => e.AreaCode)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<ZipCode>()
+                .Property(e => e.ZipName)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<ZipCode>()
+                .Property(e => e.Code)
+                .IsUnicode(false);
         }
     }
 }

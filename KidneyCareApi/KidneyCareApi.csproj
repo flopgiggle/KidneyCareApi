@@ -199,7 +199,9 @@
     <Compile Include="Controllers\Message.cs" />
     <Compile Include="Controllers\UserService.cs" />
     <Compile Include="Controllers\ValuesController.cs" />
+    <Compile Include="Dal\Area.cs" />
     <Compile Include="Dal\AuthenCode.cs" />
+    <Compile Include="Dal\City.cs" />
     <Compile Include="Dal\DataType.cs" />
     <Compile Include="Dal\Db.cs" />
     <Compile Include="Dal\Doctor.cs" />
@@ -212,10 +214,10 @@
     <Compile Include="Dal\PatientsCourse.cs" />
     <Compile Include="Dal\PatientsData.cs" />
     <Compile Include="Dal\PatientsDisease.cs" />
+    <Compile Include="Dal\Province.cs" />
     <Compile Include="Dal\Report.cs" />
-    <Compile Include="Dal\table1.cs" />
-    <Compile Include="Dal\table2.cs" />
     <Compile Include="Dal\User.cs" />
+    <Compile Include="Dal\ZipCode.cs" />
     <Compile Include="Dto\Dto.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
