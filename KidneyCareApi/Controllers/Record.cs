@@ -81,20 +81,38 @@ namespace KidneyCareApi.Controllers
                 db.PatientsDatas.Add(heartRateData);
             }
 
+            if (dto.UrineVolume != "")
+            {
+                //尿量
+                var UrineVolume = GetPatientsData(PatientsDataType.UrineVolume, dto.UrineVolume, dto.RecordTime,
+                    dto.RecordDate, patient, datetime);
+                db.PatientsDatas.Add(UrineVolume);
+            }
+
+            if (dto.BodyWeight != "")
+            {
+                //体重
+                var BodyWeight = GetPatientsData(PatientsDataType.Weight, dto.BodyWeight, dto.RecordTime,
+                    dto.RecordDate, patient, datetime);
+                db.PatientsDatas.Add(BodyWeight);
+            }
+
+
+
 
             if (dto.FastingBloodGlucose != "")
             {
                 //空腹血糖
-                var fastingBloodGlucoseData = GetPatientsData(PatientsDataType.BloodGlucose, dto.FastingBloodGlucose, dto.RecordTime,
-                    dto.RecordDate, patient, datetime, PatientsDataFormType.FastingBloodGlucose);
-                db.PatientsDatas.Add(fastingBloodGlucoseData);
+                var FBG = GetPatientsData(PatientsDataType.FBG, dto.FastingBloodGlucose, dto.RecordTime,
+                    dto.RecordDate, patient, datetime);
+                db.PatientsDatas.Add(FBG);
             }
 
 
             if (dto.BreakfastBloodGlucose != "")
             {
                 //早餐后血糖
-                var breakfastBloodGlucoseData = GetPatientsData(PatientsDataType.BloodGlucose, dto.BreakfastBloodGlucose, dto.RecordTime,
+                var breakfastBloodGlucoseData = GetPatientsData(PatientsDataType.PBG, dto.BreakfastBloodGlucose, dto.RecordTime,
                     dto.RecordDate, patient, datetime, PatientsDataFormType.BreakfastBloodGlucose);
                 db.PatientsDatas.Add(breakfastBloodGlucoseData);
             }
@@ -103,7 +121,7 @@ namespace KidneyCareApi.Controllers
             if (dto.LunchBloodGlucose != "")
             {
                 //午餐后血糖
-                var lunchBloodGlucoseData = GetPatientsData(PatientsDataType.BloodGlucose, dto.LunchBloodGlucose, dto.RecordTime,
+                var lunchBloodGlucoseData = GetPatientsData(PatientsDataType.PBG, dto.LunchBloodGlucose, dto.RecordTime,
                     dto.RecordDate, patient, datetime, PatientsDataFormType.LunchBloodGlucose);
                 db.PatientsDatas.Add(lunchBloodGlucoseData);
             }
@@ -112,26 +130,17 @@ namespace KidneyCareApi.Controllers
             if (dto.DinnerBloodGlucose != "")
             {
                 //晚餐后血糖
-                var dinnerBloodGlucoseData = GetPatientsData(PatientsDataType.BloodGlucose, dto.DinnerBloodGlucose, dto.RecordTime,
+                var dinnerBloodGlucoseData = GetPatientsData(PatientsDataType.PBG, dto.DinnerBloodGlucose, dto.RecordTime,
                     dto.RecordDate, patient, datetime, PatientsDataFormType.DinnerBloodGlucose);
                 db.PatientsDatas.Add(dinnerBloodGlucoseData);
             }
 
-
-            if (dto.BodyWeight != "")
+            if (dto.RandomBloodGlucose != "")
             {
-                //体重
-                var randomBloodGlucoseData = GetPatientsData(PatientsDataType.Weight, dto.BodyWeight, dto.RecordTime,
+                //随机血糖
+                var RBG = GetPatientsData(PatientsDataType.RBG, dto.RandomBloodGlucose, dto.RecordTime,
                     dto.RecordDate, patient, datetime);
-                db.PatientsDatas.Add(randomBloodGlucoseData);
-            }
-
-            if (dto.UrineVolume != "")
-            {
-                //尿量
-                var randomBloodGlucoseData = GetPatientsData(PatientsDataType.UrineVolume, dto.BodyWeight, dto.RecordTime,
-                    dto.RecordDate, patient, datetime);
-                db.PatientsDatas.Add(randomBloodGlucoseData);
+                db.PatientsDatas.Add(RBG);
             }
 
             db.SaveChanges();
