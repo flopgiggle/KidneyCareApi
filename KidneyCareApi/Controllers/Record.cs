@@ -118,11 +118,19 @@ namespace KidneyCareApi.Controllers
             }
 
 
-            if (dto.RandomBloodGlucose != "")
+            if (dto.BodyWeight != "")
             {
-                //随机血糖
-                var randomBloodGlucoseData = GetPatientsData(PatientsDataType.BloodGlucose, dto.RandomBloodGlucose, dto.RecordTime,
-                    dto.RecordDate, patient, datetime, PatientsDataFormType.RandomBloodGlucose);
+                //体重
+                var randomBloodGlucoseData = GetPatientsData(PatientsDataType.Weight, dto.BodyWeight, dto.RecordTime,
+                    dto.RecordDate, patient, datetime);
+                db.PatientsDatas.Add(randomBloodGlucoseData);
+            }
+
+            if (dto.UrineVolume != "")
+            {
+                //尿量
+                var randomBloodGlucoseData = GetPatientsData(PatientsDataType.UrineVolume, dto.BodyWeight, dto.RecordTime,
+                    dto.RecordDate, patient, datetime);
                 db.PatientsDatas.Add(randomBloodGlucoseData);
             }
 
@@ -184,105 +192,128 @@ namespace KidneyCareApi.Controllers
             var datas = dto.MedicalIndicators;
             var time = "00:00";
 
-            //Alb
-            if (!string.IsNullOrEmpty(datas.Alb))
-            {
-                var albData = GetPatientsData(PatientsDataType.Alb, datas.Alb, time, dto.ReportDate, patient, datetime, PatientsDataFormType.None, report);
-                db.PatientsDatas.Add(albData);
-            }
-
-            if (!string.IsNullOrEmpty(datas.BUN))
-            {
-                //Alb
-                var bUnData = GetPatientsData(PatientsDataType.BUN, datas.BUN, time, dto.ReportDate, patient, datetime, PatientsDataFormType.None, report);
-                db.PatientsDatas.Add(bUnData);
-            }
-
-
-
-            if (!string.IsNullOrEmpty(datas.Ca))
-            {
-                //Ca
-                var caData = GetPatientsData(PatientsDataType.Ca, datas.Ca, time, dto.ReportDate, patient, datetime, PatientsDataFormType.None, report);
-                db.PatientsDatas.Add(caData);
-            }
-
-
-            if (!string.IsNullOrEmpty(datas.Chol))
-            {
-                //Chol
-                var chol = GetPatientsData(PatientsDataType.Chol, datas.Chol, time, dto.ReportDate, patient, datetime, PatientsDataFormType.None, report);
-                db.PatientsDatas.Add(chol);
-            }
-
-
-            if (!string.IsNullOrEmpty(datas.Hb))
-            {
-                //Alb
-                var hb = GetPatientsData(PatientsDataType.Hb, datas.Hb, time, dto.ReportDate, patient, datetime, PatientsDataFormType.None, report);
-                db.PatientsDatas.Add(hb);
-            }
-
-
-            if (!string.IsNullOrEmpty(datas.K))
-            {
-                //Alb
-                var k = GetPatientsData(PatientsDataType.K, datas.K, time, dto.ReportDate, patient, datetime, PatientsDataFormType.None, report);
-                db.PatientsDatas.Add(k);
-            }
-
-
-            if (!string.IsNullOrEmpty(datas.Na))
-            {
-                //Alb
-                var na = GetPatientsData(PatientsDataType.Na, datas.Na, time, dto.ReportDate, patient, datetime, PatientsDataFormType.None, report);
-                db.PatientsDatas.Add(na);
-            }
-
-
-            if (!string.IsNullOrEmpty(datas.P))
-            {
-                //Alb
-                var p = GetPatientsData(PatientsDataType.P, datas.P, time, dto.ReportDate, patient, datetime, PatientsDataFormType.None, report);
-                db.PatientsDatas.Add(p);
-            }
-
-
-            if (!string.IsNullOrEmpty(datas.PTH))
-            {
-                //Alb
-                var pth = GetPatientsData(PatientsDataType.PTH, datas.PTH, time, dto.ReportDate, patient, datetime, PatientsDataFormType.None, report);
-                db.PatientsDatas.Add(pth);
-            }
-
-
+            //pro
             if (!string.IsNullOrEmpty(datas.Pro))
             {
                 var pro = GetPatientsData(PatientsDataType.Pro, datas.Pro, time, dto.ReportDate, patient, datetime, PatientsDataFormType.None, report);
                 db.PatientsDatas.Add(pro);
             }
 
+            if (!string.IsNullOrEmpty(datas.ERY))
+            {
+                var ERY = GetPatientsData(PatientsDataType.ERY, datas.ERY, time, dto.ReportDate, patient, datetime, PatientsDataFormType.None, report);
+                db.PatientsDatas.Add(ERY);
+            }
 
+            if (!string.IsNullOrEmpty(datas.LEU))
+            {
+                var LEU = GetPatientsData(PatientsDataType.LEU, datas.LEU, time, dto.ReportDate, patient, datetime, PatientsDataFormType.None, report);
+                db.PatientsDatas.Add(LEU);
+            }
+
+            if (!string.IsNullOrEmpty(datas.Upr))
+            {
+                //Upr
+                var Upr = GetPatientsData(PatientsDataType.Upr, datas.Upr, time, dto.ReportDate, patient, datetime, PatientsDataFormType.None, report);
+                db.PatientsDatas.Add(Upr);
+            }
             if (!string.IsNullOrEmpty(datas.ProICr))
             {
                 var proICr = GetPatientsData(PatientsDataType.Pro, datas.ProICr, time, dto.ReportDate, patient, datetime, PatientsDataFormType.None, report);
                 db.PatientsDatas.Add(proICr);
             }
-
-
+            if (!string.IsNullOrEmpty(datas.UAICr))
+            {
+                var UAICr = GetPatientsData(PatientsDataType.UAICr, datas.UAICr, time, dto.ReportDate, patient, datetime, PatientsDataFormType.None, report);
+                db.PatientsDatas.Add(UAICr);
+            }
+            if (!string.IsNullOrEmpty(datas.BUN))
+            {
+                //Alb
+                var bUnData = GetPatientsData(PatientsDataType.BUN, datas.BUN, time, dto.ReportDate, patient, datetime, PatientsDataFormType.None, report);
+                db.PatientsDatas.Add(bUnData);
+            }
+            //UA
+            if (!string.IsNullOrEmpty(datas.UA))
+            {
+                var UA = GetPatientsData(PatientsDataType.UA, datas.UA, time, dto.ReportDate, patient, datetime, PatientsDataFormType.None, report);
+                db.PatientsDatas.Add(UA);
+            }
+            //SCr
+            if (!string.IsNullOrEmpty(datas.SCr))
+            {
+                var SCr = GetPatientsData(PatientsDataType.SCr, datas.SCr, time, dto.ReportDate, patient, datetime, PatientsDataFormType.None, report);
+                db.PatientsDatas.Add(SCr);
+            }
             if (!string.IsNullOrEmpty(datas.eGFR))
             {
                 var eGfr = GetPatientsData(PatientsDataType.eGFR, datas.eGFR, time, dto.ReportDate, patient, datetime, PatientsDataFormType.None, report);
                 db.PatientsDatas.Add(eGfr);
             }
-
-
+            //Alb
+            if (!string.IsNullOrEmpty(datas.Alb))
+            {
+                var albData = GetPatientsData(PatientsDataType.Alb, datas.Alb, time, dto.ReportDate, patient, datetime, PatientsDataFormType.None, report);
+                db.PatientsDatas.Add(albData);
+            }
+            //TG
             if (!string.IsNullOrEmpty(datas.TG))
             {
                 var tg = GetPatientsData(PatientsDataType.TG, datas.TG, time, dto.ReportDate, patient, datetime, PatientsDataFormType.None, report);
                 db.PatientsDatas.Add(tg);
             }
-
+            if (!string.IsNullOrEmpty(datas.Chol))
+            {
+                //Chol
+                var chol = GetPatientsData(PatientsDataType.Chol, datas.Chol, time, dto.ReportDate, patient, datetime, PatientsDataFormType.None, report);
+                db.PatientsDatas.Add(chol);
+            }
+            if (!string.IsNullOrEmpty(datas.Na))
+            {
+                //Alb
+                var na = GetPatientsData(PatientsDataType.Na, datas.Na, time, dto.ReportDate, patient, datetime, PatientsDataFormType.None, report);
+                db.PatientsDatas.Add(na);
+            }
+            if (!string.IsNullOrEmpty(datas.K))
+            {
+                //Alb
+                var k = GetPatientsData(PatientsDataType.K, datas.K, time, dto.ReportDate, patient, datetime, PatientsDataFormType.None, report);
+                db.PatientsDatas.Add(k);
+            }
+            if (!string.IsNullOrEmpty(datas.P))
+            {
+                //Alb
+                var p = GetPatientsData(PatientsDataType.P, datas.P, time, dto.ReportDate, patient, datetime, PatientsDataFormType.None, report);
+                db.PatientsDatas.Add(p);
+            }
+            if (!string.IsNullOrEmpty(datas.Ca))
+            {
+                //Ca
+                var caData = GetPatientsData(PatientsDataType.Ca, datas.Ca, time, dto.ReportDate, patient, datetime, PatientsDataFormType.None, report);
+                db.PatientsDatas.Add(caData);
+            }
+            if (!string.IsNullOrEmpty(datas.Hb))
+            {
+                //Alb
+                var hb = GetPatientsData(PatientsDataType.Hb, datas.Hb, time, dto.ReportDate, patient, datetime, PatientsDataFormType.None, report);
+                db.PatientsDatas.Add(hb);
+            }
+            if (!string.IsNullOrEmpty(datas.WBC))
+            {
+                var WBC = GetPatientsData(PatientsDataType.WBC, datas.WBC, time, dto.ReportDate, patient, datetime, PatientsDataFormType.None, report);
+                db.PatientsDatas.Add(WBC);
+            }
+            if (!string.IsNullOrEmpty(datas.PLT))
+            {
+                var PLT = GetPatientsData(PatientsDataType.PLT, datas.UA, time, dto.ReportDate, patient, datetime, PatientsDataFormType.None, report);
+                db.PatientsDatas.Add(PLT);
+            }
+            if (!string.IsNullOrEmpty(datas.PTH))
+            {
+                //Alb
+                var pth = GetPatientsData(PatientsDataType.PTH, datas.PTH, time, dto.ReportDate, patient, datetime, PatientsDataFormType.None, report);
+                db.PatientsDatas.Add(pth);
+            }
 
             if (!string.IsNullOrEmpty(datas.Weight))
             {
@@ -291,11 +322,11 @@ namespace KidneyCareApi.Controllers
             }
 
 
-            if (!string.IsNullOrEmpty(datas.UA))
-            {
-                var ua = GetPatientsData(PatientsDataType.UA, datas.UA, time, dto.ReportDate, patient, datetime, PatientsDataFormType.None, report);
-                db.PatientsDatas.Add(ua);
-            }
+            //if (!string.IsNullOrEmpty(datas.UA))
+            //{
+            //    var ua = GetPatientsData(PatientsDataType.UA, datas.UA, time, dto.ReportDate, patient, datetime, PatientsDataFormType.None, report);
+            //    db.PatientsDatas.Add(ua);
+            //}
 
             db.SaveChanges();
 

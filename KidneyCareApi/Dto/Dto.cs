@@ -223,9 +223,15 @@ namespace KidneyCareApi.Dto
         public string DinnerBloodGlucose { get; set; }
 
         /// <summary>
-        /// 随机血糖
+        /// 体重
         /// </summary>
-        public string RandomBloodGlucose { get; set; }
+        public string BodyWeight { get; set; }
+
+        /// <summary>
+        /// 尿量
+        /// </summary>
+        public string UrineVolume { get; set; }
+
 
         public string OpenId { get; set; }
     }
@@ -346,19 +352,19 @@ namespace KidneyCareApi.Dto
     public enum PatientsDataType
     {
         /// <summary>
-        /// 收缩压
+        /// 收缩压SBP
         /// </summary>
         [Description("收缩压")]
         SystolicPressure = 11000,
 
         /// <summary>
-        ///     舒张压
+        ///     舒张压DBP
         /// </summary>
         [Description("舒张压")]
         DiastolicPressure = 11001,
 
         /// <summary>
-        ///     心率
+        ///     心率HR
         /// </summary>
         [Description("心率")]
         HeartRate = 11003,
@@ -370,7 +376,25 @@ namespace KidneyCareApi.Dto
         BloodGlucose = 11004,
 
         /// <summary>
-        ///     体重
+        ///     空腹血糖
+        /// </summary>
+        [Description("空腹血糖")]
+        FBG = 11005,
+
+        /// <summary>
+        ///     餐后2h血糖PBG
+        /// </summary>
+        [Description("餐后2h血糖")]
+        PBG = 11006,
+
+        /// <summary>
+        ///     随机血糖RBG
+        /// </summary>
+        [Description("随机血糖")]
+        RBG = 11007,
+
+        /// <summary>
+        ///     体重BW
         /// </summary>
         [Description("体重")]
         Weight = 6,
@@ -464,6 +488,44 @@ namespace KidneyCareApi.Dto
         /// </summary>
         [Description("甲状旁腺素")]
         PTH = 21,
+
+        /// <summary>
+        ///     尿量
+        /// </summary>
+        [Description("尿量")]
+        UrineVolume = 22,
+        /// <summary>
+        ///     尿红细胞
+        /// </summary>
+        [Description("尿红细胞")]
+        ERY = 23,
+        /// <summary>
+        ///     尿白细胞
+        /// </summary>
+        [Description("尿白细胞")]
+        LEU = 24,
+        /// <summary>
+        ///     甲状旁腺素
+        /// </summary>
+        [Description("尿白蛋白肌酐比")]
+        UAICr = 25,
+        /// <summary>
+        ///     白细胞
+        /// </summary>
+        [Description("白细胞")]
+        WBC = 26,
+        /// <summary>
+        ///     血小板
+        /// </summary>
+        [Description("血小板")]
+        PLT = 27,
+        /// <summary>
+        ///     尿蛋白定量
+        /// </summary>
+        [Description("尿蛋白定量")]
+        Upr = 28,
+        
+
     }
 
     public class GetUserInfoDto
@@ -587,7 +649,37 @@ namespace KidneyCareApi.Dto
         /// </summary>
         public string PTH { get; set; }
 
+        /// <summary>
+        ///     尿红细胞
+        /// </summary>
 
+        public string ERY { get; set; }
+
+        /// <summary>
+        ///     尿白细胞
+        /// </summary>
+        public string LEU { get; set; }
+
+        /// <summary>
+        ///     尿白蛋白肌酐比
+        /// </summary>
+        public string UAICr { get; set; }
+
+        /// <summary>
+        ///     白细胞
+        /// </summary>
+        public string WBC { get; set; }
+
+        /// <summary>
+        ///     血小板
+        /// </summary>
+        public string PLT { get; set; }
+
+        /// <summary>
+        ///     尿蛋白定量
+        /// </summary>
+        public string Upr { get; set; }
+        
     }
 
     public class UpdatePatientDisease
@@ -751,6 +843,7 @@ namespace KidneyCareApi.Dto
         public string DataName { get; set; }
         public string CreateTime { get; set; }
         public string RecordTime { get; set; }
+        public string RecordDate { get; set; }
         public string ReportName { get; set; }
         public string Unit { get; set; }
         public bool IsNomoal { get; set; }

@@ -455,6 +455,7 @@ namespace KidneyCareApi.Controllers
         }
 
         /// <summary>
+        /// Page:病人首页-我的记录 
         /// 查询病人指定日期的指标信息
         /// </summary>
         /// <param name="dto"></param>
@@ -483,17 +484,18 @@ namespace KidneyCareApi.Controllers
 
             //var patient = db.Patients.First(a => a.User.OpenId == openId);
             //病人当天的所有自我记录信息
-            var patientData = db.PatientsDatas.Where(a => a.RecordDate == queryDate && a.ReportId == null && a.PatientId == patient.Id).Select(a => new { a.DataCode, a.DataValue, a.CreateTime, a.RecordTime, a.FormType }).ToList();
+            var patientData = db.PatientsDatas.Where(a => a.RecordDate == queryDate && a.ReportId == null && a.PatientId == patient.Id).Select(a => new { a.DataCode, a.DataValue, a.CreateTime, a.RecordTime, a.FormType,a.RecordDate }).ToList();
             //病人当天的所有的报告信息
             var reportList = new List<CurrentInfoListDto>();
 
-            var reportData = db.Reports.Where(a => a.ReportDate == queryDate && a.PatientId == patient.Id).Select(a => new { a.CreateTime, a.ReportType, a.ReportDate }).ToList();
+            var reportData = db.Reports.Where(a => a.ReportDate == queryDate && a.PatientId == patient.Id).Select(a => new { a.Id,a.CreateTime, a.ReportType, a.ReportDate }).ToList().OrderBy(a=>a.Id);
             var reportDetailDatas = db.Reports.Where(a => a.ReportDate == queryDate && a.PatientId == patient.Id).SelectMany(a => a.PatientsDatas.Select(b => new { b.DataCode, b.DataValue, b.CreateTime, b.RecordTime })).ToList();
             reportData.ForEach(a =>
             {
                 var recordDto = new CurrentInfoListDto();
                 recordDto.ReportName = GetNameByReportType(a.ReportType ?? 1);
                 recordDto.CreateTime = a.CreateTime?.ToString("yyyy-MM-dd HH:mm:ss");
+                recordDto.RecordDate = a.ReportDate;
                 reportList.Add(recordDto);
             });
 
@@ -537,6 +539,7 @@ namespace KidneyCareApi.Controllers
                         oneReturnDto.DataCode = item.DataCode;
                         oneReturnDto.DataValue = item.DataValue;
                         oneReturnDto.RecordTime = item.RecordTime;
+                        oneReturnDto.RecordDate = item.RecordDate;
                         //如果有表单类型0，则说明为自定义表单字段，需要恢复设置的表单值
                         if (item.FormType != 0)
                             oneReturnDto.DataName = GetNameByFormType(item.FormType ?? 0);
@@ -602,28 +605,61 @@ namespace KidneyCareApi.Controllers
             var indicator = indicators.FirstOrDefault(x => x.DataCode == b.DataCode);
             if (indicator != null)
             {
-                b.Unit = indicator.Unit;
-                //如果指标小于最大值
-                if (indicator.Max == null || double.Parse(b.DataValue) < double.Parse(indicator.Max))
+                if (indicator.Unit != null)
                 {
-                    b.IsNomoal = true;
+                    b.Unit = indicator.Unit;
                 }
                 else
+                {
+                    b.Unit = "";
+                }
+
+                //数据为空直接返回异常
+                if (b.DataValue == null)
                 {
                     b.IsNomoal = false;
                     return;
                 }
 
-                //如果指标小于最大值
-                if (indicator.Min == null || double.Parse(b.DataValue) > double.Parse(indicator.Min))
+                //判断值是否相等
+                if (!string.IsNullOrEmpty(indicator.Equal) && b.DataValue == indicator.Equal)
                 {
                     b.IsNomoal = true;
+                    return;
                 }
-                else
+                if(!string.IsNullOrEmpty(indicator.Equal) && b.DataValue != indicator.Equal)
                 {
                     b.IsNomoal = false;
                     return;
                 }
+
+                //进行数值比较
+                double inputvalue;
+                if (double.TryParse(b.DataValue, out inputvalue))
+                {
+                    //如果指标小于最大值
+                    if (string.IsNullOrEmpty(indicator.Max) || double.Parse(b.DataValue) < double.Parse(indicator.Max))
+                    {
+                        b.IsNomoal = true;
+                    }
+                    else
+                    {
+                        b.IsNomoal = false;
+                        return;
+                    }
+
+                    //如果指标小于最大值
+                    if (string.IsNullOrEmpty(indicator.Min) || double.Parse(b.DataValue) > double.Parse(indicator.Min))
+                    {
+                        b.IsNomoal = true;
+                    }
+                    else
+                    {
+                        b.IsNomoal = false;
+                        return;
+                    }
+                }
+
             }
             else
             {

@@ -8,7 +8,7 @@ namespace KidneyCareApi.Dal
     public partial class Db : DbContext
     {
         public Db()
-            : base("name=Db10")
+            : base("name=Db11")
         {
         }
 
@@ -91,6 +91,10 @@ namespace KidneyCareApi.Dal
                 .IsUnicode(false);
 
             modelBuilder.Entity<Hospital>()
+                .Property(e => e.CityCode)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Hospital>()
                 .HasMany(e => e.Doctors)
                 .WithOptional(e => e.Hospital)
                 .HasForeignKey(e => e.BelongToHospital);
@@ -106,19 +110,35 @@ namespace KidneyCareApi.Dal
                 .HasForeignKey(e => e.BelongToHospital);
 
             modelBuilder.Entity<IndicatorsRange>()
-                .Property(e => e.Max)
-                .IsUnicode(false);
-
-            modelBuilder.Entity<IndicatorsRange>()
                 .Property(e => e.Min)
                 .IsUnicode(false);
 
             modelBuilder.Entity<IndicatorsRange>()
-                .Property(e => e.Sex)
+                .Property(e => e.Max)
                 .IsUnicode(false);
 
             modelBuilder.Entity<IndicatorsRange>()
-                .Property(e => e.Before17)
+                .Property(e => e.MaxGirl)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<IndicatorsRange>()
+                .Property(e => e.MinGirl)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<IndicatorsRange>()
+                .Property(e => e.Before17Min)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<IndicatorsRange>()
+                .Property(e => e.Before17Max)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<IndicatorsRange>()
+                .Property(e => e.After17Min)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<IndicatorsRange>()
+                .Property(e => e.After17Max)
                 .IsUnicode(false);
 
             modelBuilder.Entity<IndicatorsRange>()
@@ -127,6 +147,14 @@ namespace KidneyCareApi.Dal
 
             modelBuilder.Entity<IndicatorsRange>()
                 .Property(e => e.Unit)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<IndicatorsRange>()
+                .Property(e => e.DataName)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<IndicatorsRange>()
+                .Property(e => e.Logogram)
                 .IsUnicode(false);
 
             modelBuilder.Entity<Message>()

@@ -12,22 +12,32 @@ namespace KidneyCareApi.Dal
         public int Id { get; set; }
 
         [StringLength(255)]
-        public string Max { get; set; }
-
-        [StringLength(255)]
         public string Min { get; set; }
 
         [StringLength(255)]
-        public string Sex { get; set; }
+        public string Max { get; set; }
 
-        public int? HospitalId { get; set; }
+        [StringLength(255)]
+        public string MaxGirl { get; set; }
+
+        [StringLength(255)]
+        public string MinGirl { get; set; }
+
+        [StringLength(255)]
+        public string Before17Min { get; set; }
+
+        [StringLength(255)]
+        public string Before17Max { get; set; }
+
+        [StringLength(255)]
+        public string After17Min { get; set; }
+
+        [StringLength(255)]
+        public string After17Max { get; set; }
 
         public int? PatientId { get; set; }
 
-        public bool? After17 { get; set; }
-
-        [StringLength(255)]
-        public string Before17 { get; set; }
+        public int? HospitalId { get; set; }
 
         [StringLength(255)]
         public string Equal { get; set; }
@@ -35,7 +45,13 @@ namespace KidneyCareApi.Dal
         [StringLength(255)]
         public string Unit { get; set; }
 
+        [StringLength(255)]
+        public string DataName { get; set; }
+
         public int? DataCode { get; set; }
+
+        [StringLength(255)]
+        public string Logogram { get; set; }
 
         public DateTime? CreateTime { get; set; }
 

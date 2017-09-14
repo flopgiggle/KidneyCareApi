@@ -23,11 +23,11 @@ namespace KidneyCareApi.Dal
         [StringLength(50)]
         public string Name { get; set; }
 
-        [StringLength(50)]
-        public string CityCode { get; set; }
-        
         [StringLength(255)]
         public string Code { get; set; }
+
+        [StringLength(255)]
+        public string CityCode { get; set; }
 
         public DateTime? CreateTime { get; set; }
 
