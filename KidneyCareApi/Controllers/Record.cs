@@ -2,6 +2,7 @@
 using System.Collections;
 using KidneyCareApi.Common;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -174,6 +175,43 @@ namespace KidneyCareApi.Controllers
         }
 
         /// <summary>
+        /// 男	 肌酐≦79.56  56-122	ml/min/1.73m2	141*power((to_number(肌酐/79.56）,(-0.411))*power((0.993),年龄）       其中power是指开方，to_number是指取整数
+        //  男   肌酐>79.56			141*power((to_number(肌酐/79.56）, (-1.209))*power((0.993),年龄）
+        //  女   肌酐≦61.88			144*power((to_number(肌酐/61.88）, (-0.329))*power((0.993),年龄）
+        //  女   肌酐>61.88			144*power((to_number(肌酐/61.88）, (-1.209))*power((0.993),年龄）
+        /// </summary>
+        /// <param name="SCr"></param>
+        /// <param name="sex"></param>
+        /// <returns></returns>
+        public string GetEGFR(double SCr,int sex,int age)
+        {
+            //141*power((to_number(肌酐/79.56）,(-0.411))*power((0.993),年龄）       其中power是指开方，to_number是指取整数
+            if (sex == 0 && SCr <=79.56)
+            {
+                return Math.Round((141*Math.Pow((int) (SCr / 79.56), -0.411) * Math.Pow((0.993), age)),2).ToString(CultureInfo.InvariantCulture);
+            }
+
+            //141*power((to_number(肌酐/79.56）,(-1.209))*power((0.993),年龄）
+            if (sex == 0 && SCr > 79.56)
+            {
+                return Math.Round((141 * Math.Pow((int)(SCr / 79.56), -1.209) * Math.Pow((0.993), age)),2).ToString(CultureInfo.InvariantCulture);
+            }
+
+            //144*power((to_number(肌酐/61.88）,(-0.329))*power((0.993),年龄）
+            if (sex == 1 && SCr <= 61.88)
+            {
+                return Math.Round((141 * Math.Pow((int)(SCr / 61.88), -0.329) * Math.Pow((0.993), age)), 2).ToString(CultureInfo.InvariantCulture);
+            }
+
+            //144*power((to_number(肌酐/61.88）,(-1.209))*power((0.993),年龄）
+            if (sex == 1 && SCr > 61.88)
+            {
+                return Math.Round((141 * Math.Pow((int)(SCr / 61.88), -1.209) * Math.Pow((0.993), age)), 2).ToString(CultureInfo.InvariantCulture);
+            }
+            return "";
+        }
+
+        /// <summary>
         /// 新增报告
         /// </summary>
         /// <param name="dto"></param>
@@ -200,6 +238,11 @@ namespace KidneyCareApi.Controllers
 
             var datas = dto.MedicalIndicators;
             var time = "00:00";
+            var brithday = patient.User.Birthday;
+            int y1 = DateTime.Parse(brithday).Year;
+            int y2 = DateTime.Now.Year;
+            int age = y2 - y1;
+            var sex = patient.User.Sex;
 
             //pro
             if (!string.IsNullOrEmpty(datas.Pro))
@@ -228,7 +271,7 @@ namespace KidneyCareApi.Controllers
             }
             if (!string.IsNullOrEmpty(datas.ProICr))
             {
-                var proICr = GetPatientsData(PatientsDataType.Pro, datas.ProICr, time, dto.ReportDate, patient, datetime, PatientsDataFormType.None, report);
+                var proICr = GetPatientsData(PatientsDataType.ProICr, datas.ProICr, time, dto.ReportDate, patient, datetime, PatientsDataFormType.None, report);
                 db.PatientsDatas.Add(proICr);
             }
             if (!string.IsNullOrEmpty(datas.UAICr))
@@ -253,10 +296,9 @@ namespace KidneyCareApi.Controllers
             {
                 var SCr = GetPatientsData(PatientsDataType.SCr, datas.SCr, time, dto.ReportDate, patient, datetime, PatientsDataFormType.None, report);
                 db.PatientsDatas.Add(SCr);
-            }
-            if (!string.IsNullOrEmpty(datas.eGFR))
-            {
-                var eGfr = GetPatientsData(PatientsDataType.eGFR, datas.eGFR, time, dto.ReportDate, patient, datetime, PatientsDataFormType.None, report);
+
+                //根据肌酐 eGfr自动计算
+                var eGfr = GetPatientsData(PatientsDataType.eGFR,GetEGFR(double.Parse(datas.SCr),int.Parse(sex) ,age), time, dto.ReportDate, patient, datetime, PatientsDataFormType.None, report);
                 db.PatientsDatas.Add(eGfr);
             }
             //Alb
@@ -314,7 +356,7 @@ namespace KidneyCareApi.Controllers
             }
             if (!string.IsNullOrEmpty(datas.PLT))
             {
-                var PLT = GetPatientsData(PatientsDataType.PLT, datas.UA, time, dto.ReportDate, patient, datetime, PatientsDataFormType.None, report);
+                var PLT = GetPatientsData(PatientsDataType.PLT, datas.PLT, time, dto.ReportDate, patient, datetime, PatientsDataFormType.None, report);
                 db.PatientsDatas.Add(PLT);
             }
             if (!string.IsNullOrEmpty(datas.PTH))

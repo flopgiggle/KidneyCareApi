@@ -223,6 +223,11 @@ namespace KidneyCareApi.Dto
         public string DinnerBloodGlucose { get; set; }
 
         /// <summary>
+        /// 随机血糖
+        /// </summary>
+        public string RandomBloodGlucose { get; set; }
+
+        /// <summary>
         /// 体重
         /// </summary>
         public string BodyWeight { get; set; }

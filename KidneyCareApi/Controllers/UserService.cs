@@ -58,20 +58,21 @@ namespace KidneyCareApi.Controllers
         /// 获取OpenId
         /// </summary>
         /// <returns></returns>
-        public string GetOpenIdByCode(string code)
+        public string GetOpenIdByCode(string code,string appId,string secret)
         {
             string openId = "";
             var http = new HttpHelper();
             var item = GetHttpItem();
-            item.URL = "https://api.weixin.qq.com/sns/jscode2session?appid=wx941fffa48c073a0d&secret=1b71efd31775ec025045185b951e0296&js_code=" + code + "&grant_type=authorization_code";
+            item.URL = "https://api.weixin.qq.com/sns/jscode2session?appid="+ appId + "&secret="+ secret + "&js_code=" + code + "&grant_type=authorization_code";
             item.Method = "get";
             item.Accept = "image/webp,image/*,*/*;q=0.8";
             item.ResultType = ResultType.Byte;
             var result = http.GetHtml(item).Html;
+            //Util.AddLog(new LogInfo() { Describle = "GetUserInfo" + result });
             var jsonResult = JObject.Parse(result);
             if (jsonResult["openid"] != null)
             {
-                Util.AddLog(new LogInfo() { Describle = "GetUserInfo" + jsonResult["openid"] });
+                //Util.AddLog(new LogInfo() { Describle = "GetUserInfo" + jsonResult["openid"] });
                 openId = jsonResult["openid"].Value<string>();
             }
             return openId;
@@ -91,7 +92,7 @@ namespace KidneyCareApi.Controllers
             //HttpClient http = new HttpClient();
             if (string.IsNullOrEmpty(paramsDto.OpenId))
             {
-                paramsDto.OpenId = GetOpenIdByCode(paramsDto.Code);
+                paramsDto.OpenId = GetOpenIdByCode(paramsDto.Code, "wx494a66b63b939c3e", "9d221b1b89a5d840f95332afdeb1a3f3");
             };
 
             if (string.IsNullOrEmpty(paramsDto.OpenId))
@@ -172,7 +173,7 @@ namespace KidneyCareApi.Controllers
             //HttpClient http = new HttpClient();
             if (string.IsNullOrEmpty(paramsDto.OpenId))
             {
-                paramsDto.OpenId = GetOpenIdByCode(paramsDto.Code);
+                paramsDto.OpenId = GetOpenIdByCode(paramsDto.Code, "wx941fffa48c073a0d", "1b71efd31775ec025045185b951e0296");
             };
 
             if (string.IsNullOrEmpty(paramsDto.OpenId))
