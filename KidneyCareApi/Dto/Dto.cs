@@ -137,6 +137,7 @@ namespace KidneyCareApi.Dto
         public string DiseaseType { get; set; }
         public int JobTitle { get; set; }
         public string Profile { get; set; }
+        public List<Dal.PatientsDisease> Disease { get; set; }
     }
 
     public class GetMessageReturnDto
