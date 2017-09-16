@@ -554,6 +554,7 @@ namespace KidneyCareApi.Dto
         public Patient Patient { get; set; }
         public Doctor Doctor { get; set; }
         public Nurse Nurse { get; set; }
+        public List<Dal.PatientsDisease> Disease { get; set; }
     }
 
     public class GetUserInfoParamsDto

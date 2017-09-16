@@ -8,7 +8,7 @@ namespace KidneyCareApi.Dal
     public partial class Db : DbContext
     {
         public Db()
-            : base("name=Db11")
+            : base("name=Db13")
         {
         }
 
@@ -168,6 +168,10 @@ namespace KidneyCareApi.Dal
 
             modelBuilder.Entity<Patient>()
                 .Property(e => e.BindStatus)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Patient>()
+                .Property(e => e.LastExceptionDate)
                 .IsUnicode(false);
 
             modelBuilder.Entity<Patient>()

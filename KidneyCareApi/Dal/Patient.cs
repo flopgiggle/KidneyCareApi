@@ -36,6 +36,9 @@ namespace KidneyCareApi.Dal
         [StringLength(255)]
         public string BindStatus { get; set; }
 
+        [StringLength(255)]
+        public string LastExceptionDate { get; set; }
+
         public DateTime? CreateTime { get; set; }
 
         public DateTime? UpdateTime { get; set; }

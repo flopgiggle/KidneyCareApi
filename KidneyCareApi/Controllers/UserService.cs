@@ -2,6 +2,7 @@
 using KidneyCareApi.Common;
 using System.Collections.Generic;
 using System.Data.Entity;
+using System.Data.Entity.Migrations;
 using System.Linq;
 using System.Net.Http;
 using System.Runtime.InteropServices;
@@ -197,12 +198,12 @@ namespace KidneyCareApi.Controllers
                 user.OpenId = paramsDto.OpenId;
                 user.CreateTime = DateTime.Now;
                 user.Status = (int)UserStatusType.Registered;
-                db.Users.Add(user);
+                db.Users.AddOrUpdate(user);
 
                 //创建病人
                 var newPatient = new Patient();
                 newPatient.User = user;
-                db.Patients.Add(newPatient);
+                db.Patients.AddOrUpdate(newPatient);
                 db.SaveChanges();
             }
             var returnUserInfo = new GetUserInfoDto();
@@ -234,7 +235,21 @@ namespace KidneyCareApi.Controllers
             returnUserInfo.Patient.DiseaseType = patient.DiseaseType;
             returnUserInfo.Patient.Id = patient.Id;
 
-            var disease = db.PatientsDiseases.Where(a => a.PatientId == patient.Id).Select(a => new { a.PatientId, a.DiseaseName, a.DiseaseType, a.DiseaseCode }).ToList();
+            var diseasefromdb = db.PatientsDiseases.Where(a => a.PatientId == patient.Id).Select(a => new { a.PatientId, a.DiseaseName, a.DiseaseType, a.DiseaseCode }).ToList();
+            List<Dal.PatientsDisease> disease = new List<Dal.PatientsDisease>();
+            //disease
+            //disease = Util.MapTo<List<Dal.PatientsDisease>>(diseasefromdb);
+            //returnUserInfo.Disease
+            diseasefromdb.ForEach(a =>
+            {
+                PatientsDisease d = new PatientsDisease();
+                d.PatientId = a.PatientId;
+                d.DiseaseName = a.DiseaseName;
+                d.DiseaseCode = a.DiseaseCode;
+                d.DiseaseType = a.DiseaseType;
+                disease.Add(d);
+            });
+            returnUserInfo.Disease = disease;
             return Util.ReturnOkResult(returnUserInfo);
 
 
