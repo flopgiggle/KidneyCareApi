@@ -159,7 +159,7 @@ namespace KidneyCareApi.Controllers
             Db db = new Db();
             var disease = db.PatientsDiseases.Where(a => a.PatientId == patientId).Select(a => new { a.PatientId, a.DiseaseName, a.DiseaseType, a.DiseaseCode }).ToList();
             var course = db.PatientsCourses.Where(a => a.PaitentId == patientId).Select(a => new { a.PaitentId, a.CoursCode, a.CoursName }).ToList();
-            var patientBaseInfo = db.Patients.Where(a => a.Id == patientId).Select(a => new { a.CKDLeave,a.User.UserName,a.User.Birthday,a.User.Sex }).FirstOrDefault();
+            var patientBaseInfo = db.Patients.Where(a => a.Id == patientId).Select(a => new { a.CKDLeave,a.User.UserName,a.User.Birthday,a.User.Sex,a.User.WxAvatarUrl }).FirstOrDefault();
             var returnObj = new { disease, course, patientBaseInfo };
             return Util.ReturnOkResult(JsonConvert.SerializeObject(returnObj));
         }
@@ -297,7 +297,7 @@ namespace KidneyCareApi.Controllers
             user.OpenId = dto.OpenId;
             user.IdCard = dto.IdCard;
             user.UserName = dto.UserName;
-
+            user.WxAvatarUrl = dto.WxAvatarUrl;
 
             //获取病人并且设置病人信息
             var patient = db.Users.First(a => a.OpenId == dto.OpenId).Patients.First();
@@ -412,6 +412,7 @@ namespace KidneyCareApi.Controllers
             public int patientId { get; set; }
             public string age { get; set; }
             public bool isException { get; set; }
+            public string WxAvatarUrl { get; set; }
         }
 
 
@@ -439,6 +440,7 @@ namespace KidneyCareApi.Controllers
                     a.CKDLeave,
                     patientId = a.Id,
                     age = "",
+                    a.User.WxAvatarUrl,
                     //disases = a.PatientsDiseases.Select(b => new {b.DiseaseType, b.DiseaseName})
                 }
                 ).ToList();
@@ -455,7 +457,7 @@ namespace KidneyCareApi.Controllers
                 oneItem.UserName = a.UserName;
                 oneItem.CKDLeave = a.CKDLeave;
                 oneItem.patientId = a.patientId;
-
+                oneItem.WxAvatarUrl = a.WxAvatarUrl;
 
 
                 var result =GetExcpetRecordInfoList(DateTime.Now.AddDays(-30).ToString("yyyy-MM-dd"),
@@ -549,6 +551,8 @@ namespace KidneyCareApi.Controllers
                     
                 }
             });
+            var newrecord = list.Result.MyRecord.Where(a => a.Count > 0).ToList();
+            list.Result.MyRecord = newrecord;
 
             list.Result.MyReport.ForEach(a =>
             {

@@ -50,6 +50,9 @@ namespace KidneyCareApi.Dal
         [StringLength(255)]
         public string OpenId { get; set; }
 
+        [StringLength(500)]
+        public string WxAvatarUrl { get; set; }
+        
         public int? Status { get; set; }
 
         [StringLength(2000)]
