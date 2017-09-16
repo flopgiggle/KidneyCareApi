@@ -788,6 +788,11 @@ namespace KidneyCareApi.Dto
         /// </summary>
         [Description("铁代谢")]
         IronMetabolism = 8,
+        /// <summary>
+        ///     铁代谢
+        /// </summary>
+        [Description("肾病指数")]
+        KidneyDiseaseIndex = 10,
 
     }
 

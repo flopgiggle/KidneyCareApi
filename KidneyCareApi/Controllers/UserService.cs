@@ -537,36 +537,13 @@ namespace KidneyCareApi.Controllers
             List<CurrentInfoListDto> dulToRemove = new List<CurrentInfoListDto>();
             //移除正常指标，只看异常的
 
-            
 
-
-            list.Result.MyRecord.ForEach(a =>
-            {
-                for (int i = a.Count - 1; i >= 0; i--)
-                {
-                    if (a[i].IsNomoal)
-                    {
-                        a.Remove(a[i]);
-                    }
-                    
-                }
-            });
-            var newrecord = list.Result.MyRecord.Where(a => a.Count > 0).ToList();
+            var newrecord = list.Result.MyRecord.Where(a=>a.Count>0).Select(a =>a.Where(b => b.IsNomoal == false).ToList()).ToList();
             list.Result.MyRecord = newrecord;
 
-            list.Result.MyReport.ForEach(a =>
-            {
-                for (int i = a.Count - 1; i >= 0; i--)
-                {
-                    if (a[i].IsNomoal && a[i].ReportName=="")
-                    {
-                        a.Remove(a[i]);
-                    }
+            
 
-                }
-            });
-
-            var newreport = list.Result.MyReport.Where(a => a.Count > 0).ToList();
+            var newreport = list.Result.MyReport.Where(a=>a.Count>0).Select(a =>a.Where(b => b.IsNomoal == false).ToList()).ToList();
             list.Result.MyReport = newreport;
             return list;
         }
@@ -597,11 +574,19 @@ namespace KidneyCareApi.Controllers
             patientsCourse.ObjectCode = patientDto.ObjectCode;
             patientsCourse.ObjectName = patientDto.ObjectName;
             patientsCourse.PaitentId = patientDto.PatientId;
+            patientsCourse.CreateTime = DateTime.Now;
             db.PatientsCourses.Add(patientsCourse);
             db.SaveChanges();
             return Util.ReturnOkResult(true);
         }
 
+        /// <summary>
+        /// Page:医护-患教评估
+        /// </summary>
+        /// <param name="startDate"></param>
+        /// <param name="endDate"></param>
+        /// <param name="patientId"></param>
+        /// <returns></returns>
         [HttpGet]
         [Route("getPatientCourseEvaluate/{startDate}/{endDate}/{patientId}")]
         public ResultPakage<string> GetPatientCourseEvaluate(string startDate, string endDate, int patientId)
@@ -615,8 +600,9 @@ namespace KidneyCareApi.Controllers
                 a.CoursName,
                 a.AttendingDates,
                 a.CognitionName,
-                a.CoursCode
-            }).ToList();
+                a.CoursCode,
+                a.CreateTime
+            }).OrderByDescending(a => new { a.AttendingDates, a.CreateTime }).ToList();
 
             return Util.ReturnOkResult(JsonConvert.SerializeObject(courses));
         }
