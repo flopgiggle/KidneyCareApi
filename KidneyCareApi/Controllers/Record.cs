@@ -2,6 +2,7 @@
 using System.Collections;
 using KidneyCareApi.Common;
 using System.Collections.Generic;
+using System.Data.Entity;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -10,9 +11,13 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Http;
+using AutoMapper;
+using KidneyCareApi.BLL;
 using KidneyCareApi.Dal;
 using KidneyCareApi.Dto;
+using Newtonsoft.Json;
 using WebGrease;
+using WebGrease.Css.Extensions;
 
 
 namespace KidneyCareApi.Controllers
@@ -55,13 +60,14 @@ namespace KidneyCareApi.Controllers
 
             //根据openid 查询病人信息
             var patient = db.Patients.First(a => a.User.OpenId == dto.OpenId);
-
+            List<PatientsData> patientsData = new List<PatientsData>();
             if (dto.SystolicPressure != "")
             {
                 //收缩压
                 var systolicPressureData = GetPatientsData(PatientsDataType.SystolicPressure, dto.SystolicPressure, dto.RecordTime,
                     dto.RecordDate, patient, datetime);
                 db.PatientsDatas.Add(systolicPressureData);
+                patientsData.Add(systolicPressureData);
             }
 
 
@@ -71,6 +77,7 @@ namespace KidneyCareApi.Controllers
                 var diastolicPressureData = GetPatientsData(PatientsDataType.DiastolicPressure, dto.DiastolicPressure, dto.RecordTime,
                     dto.RecordDate, patient, datetime);
                 db.PatientsDatas.Add(diastolicPressureData);
+                patientsData.Add(diastolicPressureData);
             }
 
 
@@ -80,6 +87,7 @@ namespace KidneyCareApi.Controllers
                 var heartRateData = GetPatientsData(PatientsDataType.HeartRate, dto.HeartRate, dto.RecordTime,
                     dto.RecordDate, patient, datetime);
                 db.PatientsDatas.Add(heartRateData);
+                patientsData.Add(heartRateData);
             }
 
             if (dto.UrineVolume != "")
@@ -88,6 +96,7 @@ namespace KidneyCareApi.Controllers
                 var UrineVolume = GetPatientsData(PatientsDataType.UrineVolume, dto.UrineVolume, dto.RecordTime,
                     dto.RecordDate, patient, datetime);
                 db.PatientsDatas.Add(UrineVolume);
+                patientsData.Add(UrineVolume);
             }
 
             if (dto.BodyWeight != "")
@@ -96,6 +105,7 @@ namespace KidneyCareApi.Controllers
                 var BodyWeight = GetPatientsData(PatientsDataType.Weight, dto.BodyWeight, dto.RecordTime,
                     dto.RecordDate, patient, datetime);
                 db.PatientsDatas.Add(BodyWeight);
+                patientsData.Add(BodyWeight);
             }
 
 
@@ -107,6 +117,7 @@ namespace KidneyCareApi.Controllers
                 var FBG = GetPatientsData(PatientsDataType.FBG, dto.FastingBloodGlucose, dto.RecordTime,
                     dto.RecordDate, patient, datetime);
                 db.PatientsDatas.Add(FBG);
+                patientsData.Add(FBG);
             }
 
 
@@ -116,6 +127,7 @@ namespace KidneyCareApi.Controllers
                 var breakfastBloodGlucoseData = GetPatientsData(PatientsDataType.PBG, dto.BreakfastBloodGlucose, dto.RecordTime,
                     dto.RecordDate, patient, datetime, PatientsDataFormType.BreakfastBloodGlucose);
                 db.PatientsDatas.Add(breakfastBloodGlucoseData);
+                patientsData.Add(breakfastBloodGlucoseData);
             }
 
 
@@ -125,6 +137,7 @@ namespace KidneyCareApi.Controllers
                 var lunchBloodGlucoseData = GetPatientsData(PatientsDataType.PBG, dto.LunchBloodGlucose, dto.RecordTime,
                     dto.RecordDate, patient, datetime, PatientsDataFormType.LunchBloodGlucose);
                 db.PatientsDatas.Add(lunchBloodGlucoseData);
+                patientsData.Add(lunchBloodGlucoseData);
             }
 
 
@@ -134,6 +147,7 @@ namespace KidneyCareApi.Controllers
                 var dinnerBloodGlucoseData = GetPatientsData(PatientsDataType.PBG, dto.DinnerBloodGlucose, dto.RecordTime,
                     dto.RecordDate, patient, datetime, PatientsDataFormType.DinnerBloodGlucose);
                 db.PatientsDatas.Add(dinnerBloodGlucoseData);
+                patientsData.Add(dinnerBloodGlucoseData);
             }
 
             if (dto.RandomBloodGlucose != "")
@@ -142,35 +156,17 @@ namespace KidneyCareApi.Controllers
                 var RBG = GetPatientsData(PatientsDataType.RBG, dto.RandomBloodGlucose, dto.RecordTime,
                     dto.RecordDate, patient, datetime);
                 db.PatientsDatas.Add(RBG);
+                patientsData.Add(RBG);
+            }
+
+            //判定是否有异常存在，如果有异常则写入最近异常信息
+            if (IsExceptionData(patientsData, patient))
+            {
+                patient.LastExceptionDate = DateTime.Now.ToString("yyyy-MM-dd");
             }
 
             db.SaveChanges();
 
-            //var doctor = db.Doctors.First(a => a.Id == dto.BelongToDoctor);
-            //var nurse = db.Nurses.First(a => a.Id == dto.BelongToNurse);
-            //var hospital = db.Hospitals.First(a => a.Id == dto.BelongToHospital);
-
-            ////创建用户
-            //Dal.User user = new User();
-            //user.Birthday = dto.Birthday;
-            //user.CreateTime = DateTime.Now;
-            //user.OpenId = dto.OpenId;
-            //user.MobilePhone = dto.MobilePhone;
-            //user.Sex = dto.Sex;
-            //user.Status = 1;
-            //user.OpenId = dto.OpenId;
-
-            //Dal.Patient patient = new Patient();
-            //patient.User = user;
-            //patient.Hospital = hospital;
-            //patient.Doctor = doctor;
-            //patient.CreateTime = DateTime.Now;
-
-            //db.Users.Add(user);
-            //db.Patients.Add(patient);
-            //db.SaveChanges();
-
-            //db.Users.Add(new User(){Doctors = });
             return Util.ReturnOkResult(true);
         }
 
@@ -243,24 +239,27 @@ namespace KidneyCareApi.Controllers
             int y2 = DateTime.Now.Year;
             int age = y2 - y1;
             var sex = patient.User.Sex;
-
+            List<PatientsData> patientsData = new List<PatientsData>();
             //pro
             if (!string.IsNullOrEmpty(datas.Pro))
             {
                 var pro = GetPatientsData(PatientsDataType.Pro, datas.Pro, time, dto.ReportDate, patient, datetime, PatientsDataFormType.None, report);
                 db.PatientsDatas.Add(pro);
+                patientsData.Add(pro);
             }
 
             if (!string.IsNullOrEmpty(datas.ERY))
             {
                 var ERY = GetPatientsData(PatientsDataType.ERY, datas.ERY, time, dto.ReportDate, patient, datetime, PatientsDataFormType.None, report);
                 db.PatientsDatas.Add(ERY);
+                patientsData.Add(ERY);
             }
 
             if (!string.IsNullOrEmpty(datas.LEU))
             {
                 var LEU = GetPatientsData(PatientsDataType.LEU, datas.LEU, time, dto.ReportDate, patient, datetime, PatientsDataFormType.None, report);
                 db.PatientsDatas.Add(LEU);
+                patientsData.Add(LEU);
             }
 
             if (!string.IsNullOrEmpty(datas.Upr))
@@ -268,146 +267,158 @@ namespace KidneyCareApi.Controllers
                 //Upr
                 var Upr = GetPatientsData(PatientsDataType.Upr, datas.Upr, time, dto.ReportDate, patient, datetime, PatientsDataFormType.None, report);
                 db.PatientsDatas.Add(Upr);
+                patientsData.Add(Upr);
             }
             if (!string.IsNullOrEmpty(datas.ProICr))
             {
                 var proICr = GetPatientsData(PatientsDataType.ProICr, datas.ProICr, time, dto.ReportDate, patient, datetime, PatientsDataFormType.None, report);
                 db.PatientsDatas.Add(proICr);
+                patientsData.Add(proICr);
             }
             if (!string.IsNullOrEmpty(datas.UAICr))
             {
                 var UAICr = GetPatientsData(PatientsDataType.UAICr, datas.UAICr, time, dto.ReportDate, patient, datetime, PatientsDataFormType.None, report);
                 db.PatientsDatas.Add(UAICr);
+                patientsData.Add(UAICr);
             }
             if (!string.IsNullOrEmpty(datas.BUN))
             {
                 //Alb
                 var bUnData = GetPatientsData(PatientsDataType.BUN, datas.BUN, time, dto.ReportDate, patient, datetime, PatientsDataFormType.None, report);
                 db.PatientsDatas.Add(bUnData);
+                patientsData.Add(bUnData);
             }
             //UA
             if (!string.IsNullOrEmpty(datas.UA))
             {
                 var UA = GetPatientsData(PatientsDataType.UA, datas.UA, time, dto.ReportDate, patient, datetime, PatientsDataFormType.None, report);
                 db.PatientsDatas.Add(UA);
+                patientsData.Add(UA);
             }
             //SCr
             if (!string.IsNullOrEmpty(datas.SCr))
             {
                 var SCr = GetPatientsData(PatientsDataType.SCr, datas.SCr, time, dto.ReportDate, patient, datetime, PatientsDataFormType.None, report);
                 db.PatientsDatas.Add(SCr);
+                patientsData.Add(SCr);
 
                 //根据肌酐 eGfr自动计算
                 var eGfr = GetPatientsData(PatientsDataType.eGFR,GetEGFR(double.Parse(datas.SCr),int.Parse(sex) ,age), time, dto.ReportDate, patient, datetime, PatientsDataFormType.None, report);
                 db.PatientsDatas.Add(eGfr);
+                patientsData.Add(eGfr);
             }
             //Alb
             if (!string.IsNullOrEmpty(datas.Alb))
             {
                 var albData = GetPatientsData(PatientsDataType.Alb, datas.Alb, time, dto.ReportDate, patient, datetime, PatientsDataFormType.None, report);
                 db.PatientsDatas.Add(albData);
+                patientsData.Add(albData);
             }
             //TG
             if (!string.IsNullOrEmpty(datas.TG))
             {
                 var tg = GetPatientsData(PatientsDataType.TG, datas.TG, time, dto.ReportDate, patient, datetime, PatientsDataFormType.None, report);
                 db.PatientsDatas.Add(tg);
+                patientsData.Add(tg);
             }
             if (!string.IsNullOrEmpty(datas.Chol))
             {
                 //Chol
                 var chol = GetPatientsData(PatientsDataType.Chol, datas.Chol, time, dto.ReportDate, patient, datetime, PatientsDataFormType.None, report);
                 db.PatientsDatas.Add(chol);
+                patientsData.Add(chol);
             }
             if (!string.IsNullOrEmpty(datas.Na))
             {
                 //Alb
                 var na = GetPatientsData(PatientsDataType.Na, datas.Na, time, dto.ReportDate, patient, datetime, PatientsDataFormType.None, report);
                 db.PatientsDatas.Add(na);
+                patientsData.Add(na);
             }
             if (!string.IsNullOrEmpty(datas.K))
             {
                 //Alb
                 var k = GetPatientsData(PatientsDataType.K, datas.K, time, dto.ReportDate, patient, datetime, PatientsDataFormType.None, report);
                 db.PatientsDatas.Add(k);
+                patientsData.Add(k);
             }
             if (!string.IsNullOrEmpty(datas.P))
             {
                 //Alb
                 var p = GetPatientsData(PatientsDataType.P, datas.P, time, dto.ReportDate, patient, datetime, PatientsDataFormType.None, report);
                 db.PatientsDatas.Add(p);
+                patientsData.Add(p);
             }
             if (!string.IsNullOrEmpty(datas.Ca))
             {
                 //Ca
                 var caData = GetPatientsData(PatientsDataType.Ca, datas.Ca, time, dto.ReportDate, patient, datetime, PatientsDataFormType.None, report);
                 db.PatientsDatas.Add(caData);
+                patientsData.Add(caData);
             }
             if (!string.IsNullOrEmpty(datas.Hb))
             {
                 //Alb
                 var hb = GetPatientsData(PatientsDataType.Hb, datas.Hb, time, dto.ReportDate, patient, datetime, PatientsDataFormType.None, report);
                 db.PatientsDatas.Add(hb);
+                patientsData.Add(hb);
             }
             if (!string.IsNullOrEmpty(datas.WBC))
             {
                 var WBC = GetPatientsData(PatientsDataType.WBC, datas.WBC, time, dto.ReportDate, patient, datetime, PatientsDataFormType.None, report);
                 db.PatientsDatas.Add(WBC);
+                patientsData.Add(WBC);
             }
             if (!string.IsNullOrEmpty(datas.PLT))
             {
                 var PLT = GetPatientsData(PatientsDataType.PLT, datas.PLT, time, dto.ReportDate, patient, datetime, PatientsDataFormType.None, report);
                 db.PatientsDatas.Add(PLT);
+                patientsData.Add(PLT);
             }
             if (!string.IsNullOrEmpty(datas.PTH))
             {
                 //Alb
                 var pth = GetPatientsData(PatientsDataType.PTH, datas.PTH, time, dto.ReportDate, patient, datetime, PatientsDataFormType.None, report);
                 db.PatientsDatas.Add(pth);
+                patientsData.Add(pth);
             }
 
             if (!string.IsNullOrEmpty(datas.Weight))
             {
                 var weight = GetPatientsData(PatientsDataType.Weight, datas.Weight, time, dto.ReportDate, patient, datetime, PatientsDataFormType.None, report);
                 db.PatientsDatas.Add(weight);
+                patientsData.Add(weight);
             }
 
-
-            //if (!string.IsNullOrEmpty(datas.UA))
-            //{
-            //    var ua = GetPatientsData(PatientsDataType.UA, datas.UA, time, dto.ReportDate, patient, datetime, PatientsDataFormType.None, report);
-            //    db.PatientsDatas.Add(ua);
-            //}
-
+            //判定是否有异常存在，如果有异常则写入最近异常信息
+            if (IsExceptionData(patientsData, patient))
+            {
+                patient.LastExceptionDate = DateTime.Now.ToString("yyyy-MM-dd");
+            }
             db.SaveChanges();
 
-            //var doctor = db.Doctors.First(a => a.Id == dto.BelongToDoctor);
-            //var nurse = db.Nurses.First(a => a.Id == dto.BelongToNurse);
-            //var hospital = db.Hospitals.First(a => a.Id == dto.BelongToHospital);
-
-            ////创建用户
-            //Dal.User user = new User();
-            //user.Birthday = dto.Birthday;
-            //user.CreateTime = DateTime.Now;
-            //user.OpenId = dto.OpenId;
-            //user.MobilePhone = dto.MobilePhone;
-            //user.Sex = dto.Sex;
-            //user.Status = 1;
-            //user.OpenId = dto.OpenId;
-
-            //Dal.Patient patient = new Patient();
-            //patient.User = user;
-            //patient.Hospital = hospital;
-            //patient.Doctor = doctor;
-            //patient.CreateTime = DateTime.Now;
-
-            //db.Users.Add(user);
-            //db.Patients.Add(patient);
-            //db.SaveChanges();
-
-            //db.Users.Add(new User(){Doctors = });
             //保存成功后，回传ID，用于上传图片用
             return Util.ReturnOkResult(report.Id.ToString());
+        }
+
+        //检查是否有异常指标
+        public bool IsExceptionData(List<PatientsData> datas,Dal.Patient patient)
+        {
+            PatientInfo patientInfo = new PatientInfo();
+            var indicator = patientInfo.GetIndicatorInfo(patient.Hospital.Id.ToString(), patient.Id);
+            var isException = false;
+            datas.ForEach(a =>
+            {
+                var currentInfoListDto = Mapper.Map<CurrentInfoListDto>(a);
+                //var currentInfoListDto =
+                //   new CurrentInfoListDto() {DataCode = a.DataCode, Unit = a.Unit, DataValue = a.DataValue};
+                patientInfo.IndicatorJudge(indicator, currentInfoListDto);
+                if (!currentInfoListDto.IsNomoal)
+                {
+                    isException = true;
+                }
+            });
+            return isException;
         }
 
     }

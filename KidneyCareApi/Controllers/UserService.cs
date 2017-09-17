@@ -9,6 +9,7 @@ using System.Runtime.InteropServices;
 using System.Security.Claims;
 using System.Web.Http;
 using Antlr.Runtime.Tree;
+using AutoMapper;
 using KidneyCareApi.BLL;
 using KidneyCareApi.Dal;
 using KidneyCareApi.Dto;
@@ -71,7 +72,7 @@ namespace KidneyCareApi.Controllers
             item.Accept = "image/webp,image/*,*/*;q=0.8";
             item.ResultType = ResultType.Byte;
             var result = http.GetHtml(item).Html;
-            //Util.AddLog(new LogInfo() { Describle = "GetUserInfo" + result });
+            Util.AddLog(new LogInfo() { Describle = "GetUserInfo" + result });
             var jsonResult = JObject.Parse(result);
             if (jsonResult["openid"] != null)
             {
@@ -413,6 +414,7 @@ namespace KidneyCareApi.Controllers
             public string age { get; set; }
             public bool isException { get; set; }
             public string WxAvatarUrl { get; set; }
+            public string LastExceptionDate { get; set; }
         }
 
 
@@ -426,57 +428,40 @@ namespace KidneyCareApi.Controllers
         [Route("getPatientList")]
         public ResultPakage<List<GetPatientListReturnDto>> GetPatientList(GetPatientListParamsDto paramsDto)
         {
-            
-
-
             Db db = new Db();
-            var patients = db.Patients.Where(a => (a.Doctor.User.Id == paramsDto.UserId || a.Nurse.User.Id == paramsDto.UserId))
+            var dmapper = Util.GetDynamicMap();
+            var patients = db.Patients
+                .Where(a => (a.Doctor.User.Id == paramsDto.UserId || a.Nurse.User.Id == paramsDto.UserId))
                 .Select(a => new
-                {
-                    a.User.Id,
-                    a.User.Sex,
-                    a.User.Birthday,
-                    a.User.UserName,
-                    a.CKDLeave,
-                    patientId = a.Id,
-                    age = "",
-                    a.User.WxAvatarUrl,
-                    //disases = a.PatientsDiseases.Select(b => new {b.DiseaseType, b.DiseaseName})
-                }
-                ).ToList();
+                    {
+                        a.User.Id,
+                        a.User.Sex,
+                        a.User.Birthday,
+                        a.User.UserName,
+                        a.CKDLeave,
+                        patientId = a.Id,
+                        age = "",
+                        a.User.WxAvatarUrl,
+                        a.LastExceptionDate,
+                        //disases = a.PatientsDiseases.Select(b => new {b.DiseaseType, b.DiseaseName})
+                    }
+                ).ToList().Select(dmapper.Map<GetPatientListReturnDto>).ToList();
 
-            List<GetPatientListReturnDto> returndto = new List<GetPatientListReturnDto>();
+            var startDate = DateTime.Now.AddDays(-30).ToString("yyyy-MM-dd");
 
-            //查找患者的异常记录
             patients.ForEach(a =>
             {
-                GetPatientListReturnDto oneItem = new GetPatientListReturnDto();
-                oneItem.Id = a.Id;
-                oneItem.Sex = a.Sex;
-                oneItem.Birthday = a.Birthday;
-                oneItem.UserName = a.UserName;
-                oneItem.CKDLeave = a.CKDLeave;
-                oneItem.patientId = a.patientId;
-                oneItem.WxAvatarUrl = a.WxAvatarUrl;
-
-
-                var result =GetExcpetRecordInfoList(DateTime.Now.AddDays(-30).ToString("yyyy-MM-dd"),
-                    DateTime.Now.ToString("yyyy-MM-dd"), a.patientId);
-                if (result.Result.MyRecord.Count != 0 || result.Result.MyReport.Count != 0)
+                if (!string.IsNullOrEmpty(a.LastExceptionDate) && a.LastExceptionDate.CompareTo(startDate) >= 0)
                 {
-                    oneItem.isException = true;
+                    a.isException = true;
                 }
                 else
                 {
-                    oneItem.isException = false;
+                    a.isException = false;
                 }
-                returndto.Add(oneItem);
             });
 
-            
-
-
-            return Util.ReturnOkResult(returndto);
+            return Util.ReturnOkResult(patients);
         }
 
         [HttpPost]
@@ -538,12 +523,12 @@ namespace KidneyCareApi.Controllers
             //移除正常指标，只看异常的
 
 
-            var newrecord = list.Result.MyRecord.Where(a=>a.Count>0).Select(a =>a.Where(b => b.IsNomoal == false).ToList()).ToList();
+            var newrecord = list.Result.MyRecord.Select(a => a.Where(b => b.IsNomoal == false).ToList()).Where(a=>a.Count>0).ToList();
             list.Result.MyRecord = newrecord;
 
-            
 
-            var newreport = list.Result.MyReport.Where(a=>a.Count>0).Select(a =>a.Where(b => b.IsNomoal == false).ToList()).ToList();
+
+            var newreport = list.Result.MyReport.Select(a => a.Where(b => b.IsNomoal == false || b.ReportName!= null).ToList()).Where(a => a.Count>1).ToList();
             list.Result.MyReport = newreport;
             return list;
         }

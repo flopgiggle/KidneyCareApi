@@ -14,6 +14,7 @@ using System.Reflection;
 using System.Runtime.Remoting.Messaging;
 using System.Security.Cryptography;
 using System.Text;
+using AutoMapper;
 
 //using AutoMapper;
 //using Gma.QrCodeNet.Encoding;
@@ -399,32 +400,46 @@ namespace KidneyCareApi.Common
         //    return base64Pic;
         //}
 
-        ///// <summary>
-        ///// 集合对集合
-        ///// </summary>
-        ///// <typeparam name="TResult"></typeparam>
-        ///// <param name="obj"></param>
-        ///// <returns></returns>
-        //public static List<TResult> MapTo<TResult>(IEnumerable obj)
-        //{
-        //    if (obj == null)
-        //        throw new ArgumentNullException();
-        //    Mapper.Map(obj.GetType(), typeof(TResult));
-        //    return (List<TResult>)Mapper.Map(obj, obj.GetType(), typeof(List<TResult>));
-        //}
-        ///// <summary>
-        ///// 对象对对象
-        ///// </summary>
-        ///// <typeparam name="TResult"></typeparam>
-        ///// <param name="obj"></param>
-        ///// <returns></returns>
-        //public static TResult MapTo<TResult>(object obj)
-        //{
-        //    if (obj == null)
-        //        throw new ArgumentNullException();
-        //    Mapper.Map(obj.GetType(), typeof(TResult));
-        //    return (TResult)Mapper.Map(obj, obj.GetType(), typeof(TResult));
-        //}
+        /// <summary>
+        /// 集合对集合
+        /// </summary>
+        /// <typeparam name="TResult"></typeparam>
+        /// <param name="obj"></param>
+        /// <returns></returns>
+        public static List<TResult> MapTo<TResult>(IEnumerable obj)
+        {
+            if (obj == null)
+                throw new ArgumentNullException();
+            Mapper.Map(obj.GetType(), typeof(TResult));
+            return (List<TResult>)Mapper.Map(obj, obj.GetType(), typeof(List<TResult>));
+        }
+
+
+        /// <summary>
+        /// 对象对对象
+        /// </summary>
+        /// <typeparam name="TResult"></typeparam>
+        /// <param name="obj"></param>
+        /// <returns></returns>
+        public static TResult MapTo<TResult>(object obj)
+        {
+            if (obj == null)
+                throw new ArgumentNullException();
+            Mapper.Map(obj.GetType(), typeof(TResult));
+            return (TResult)Mapper.Map(obj, obj.GetType(), typeof(TResult));
+        }
+
+        /// <summary>
+        /// 对象对对象
+        /// </summary>
+        /// <typeparam name="TResult"></typeparam>
+        /// <param name="obj"></param>
+        /// <returns></returns>
+        public static IMapper GetDynamicMap()
+        {
+            var config = new MapperConfiguration(cfg => cfg.CreateMissingTypeMaps = true);
+            return config.CreateMapper();
+        }
 
 
 

@@ -63,11 +63,12 @@ namespace KidneyCareApi.BLL
             //查询当前病人的标准指标信息
             //如果当期病人没有绑定医院信息，则默认使用华西医院的标准指标
             //查询病人医院数据
-            var patientHospitalCode = "5101000001";
+            var patientHospitalCode = "";
             if (patient.Hospital != null)
+            {
                 patientHospitalCode = patient.Hospital.Code;
-
-            var indicators = db.IndicatorsRanges.Where(a => a.Hospital.Code == patientHospitalCode).ToList();
+            }
+            var indicators = GetIndicatorInfo(patientHospitalCode, patient.Id);
             //病人当天的所有的报告信息
             var reportList = new List<CurrentInfoListDto>();
 
@@ -201,7 +202,43 @@ namespace KidneyCareApi.BLL
             return Util.ReturnOkResult(returnDto);
         }
 
-        private void IndicatorJudge(List<IndicatorsRange> indicators, CurrentInfoListDto b)
+        /// <summary>
+        /// 获取医学指标数据，可按医院或者，或者针对某个病人获取(预留接口patientId)
+        /// </summary>
+        /// <param name="hospitalId"></param>
+        /// <param name="patientId"></param>
+        /// <returns></returns>
+        public List<IndicatorsRange> GetIndicatorInfo(string hospitalId, int patientId)
+        {
+            //查询当前病人的标准指标信息
+            //如果当期病人没有绑定医院信息，则默认使用华西医院的标准指标
+            //查询病人医院数据
+            //var patientHospitalCode = "5101000001";
+            List <IndicatorsRange> indicators = new List<IndicatorsRange>();
+            var db = new Db();
+            if (!string.IsNullOrEmpty(hospitalId))
+            {
+                indicators = db.IndicatorsRanges.Where(a => a.Hospital.Code == hospitalId).ToList();
+            }
+            //如果医院为空
+            if (string.IsNullOrEmpty(hospitalId) || indicators.Count == 0)
+            {
+                indicators = db.IndicatorsRanges.Where(a => a.Hospital.Code == "5101000001").ToList();
+            }
+
+            return indicators;
+
+        }
+
+        public class IndicatorJudgeDto
+        {
+            public int DataCode { get; set; }
+            public string Unit { get; set; }
+            public string DataValue { get; set; }
+            public bool IsNomoal { get; set; }
+        }
+
+        public void IndicatorJudge(List<IndicatorsRange> indicators, CurrentInfoListDto b)
         {
             var indicator = indicators.FirstOrDefault(x => x.DataCode == b.DataCode);
             if (indicator != null)
