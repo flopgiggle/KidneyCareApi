@@ -195,14 +195,20 @@ namespace KidneyCareApi.Controllers
         {
             var db = new Db();
             Dal.Message message = new Dal.Message();
-
             //检查用户角色，如果为医生，则需要转换touser为患者用户id
             var usertype = db.Users.Where(a => a.Id == dto.FromUser).FirstOrDefault().UserType;
+
+
+            message.ToUser = dto.ToUser;
             if ((int) UserType.Nures == usertype || (int) UserType.Doctor == usertype)
             {
                 message.ToUser = db.Patients.Where(a => a.Id == dto.ToUser).Select(a => a.UserId).FirstOrDefault();
             }
-            message.ToUser = dto.ToUser;
+            //如果为患者,需要转换touser为医生的userid
+            if ((int)UserType.Patient == usertype)
+            {
+
+            }
             message.FromUser = dto.FromUser;
             message.Messge = dto.Message;
             message.CreateTime = DateTime.Now;
@@ -249,13 +255,14 @@ namespace KidneyCareApi.Controllers
         {
             var db = new Db();
 
-            var returnMessageList = db.Messages.Where(a=>a.FromUser == dto.UserId || a.ToUser == dto.UserId).Select(a=>new {a.CreateTime,a.FromUser,a.ToUser,a.Messge,a.IsRead,a.Id,a.User.UserType}).OrderByDescending(a=>a.CreateTime).ToList();
+            var returnMessageList = db.Messages.Where(a=>a.FromUser == dto.UserId || a.ToUser == dto.UserId).Select(a=>new {a.CreateTime,a.FromUser,a.ToUser,a.Messge,a.IsRead,a.Id,a.User.UserType}).OrderBy(a=>a.CreateTime).ToList();
             var allNotReadMessage = db.Messages.Where(a => a.ToUser == dto.UserId && a.IsRead == false);
             allNotReadMessage.ForEach(a =>
             {
                 a.IsRead = true;
             });
             db.SaveChanges();
+
             List<GetMessageReturnDto> messageList = new List<GetMessageReturnDto>();
             returnMessageList.ForEach(a =>
             {
@@ -271,6 +278,29 @@ namespace KidneyCareApi.Controllers
 
             //db.Users.Add(new User(){Doctors = });
             return Util.ReturnOkResult(messageList);
+        }
+
+        /// <summary>
+        /// 获取指定病人的聊天记录
+        /// </summary>
+        /// <param name="dto"></param>
+        /// <returns></returns>
+        [HttpPost]
+        //[OpenApi]
+        [Route("getMessageForPatient")]
+        public ResultPakage<List<GetMessageReturnDto>> GetMessageForPatient(GetMssageDto dto)
+        {
+            var returnDto = GetMessage(dto);
+            var db = new Db();
+            var firstOrDefault = db.Patients.FirstOrDefault(a => a.Id == dto.PatientId);
+            if (firstOrDefault != null)
+            {
+                var pUserId = firstOrDefault.User.Id;
+                //只查指定两人的对话信息
+                returnDto.Result = returnDto.Result.Where(a => (a.ToUser==dto.UserId || a.ToUser==pUserId) && (a.FromUser == dto.UserId || a.FromUser == pUserId)).ToList();
+            }
+            //db.Users.Add(new User(){Doctors = });
+            return returnDto;
         }
 
     }

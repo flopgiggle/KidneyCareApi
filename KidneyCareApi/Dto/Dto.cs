@@ -75,6 +75,7 @@ namespace KidneyCareApi.Dto
         public string Index;
         public string PageSize;
         public int UserId;
+        public int PatientId;
     }
 
     /// <summary>

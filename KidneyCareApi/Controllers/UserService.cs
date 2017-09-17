@@ -220,13 +220,15 @@ namespace KidneyCareApi.Controllers
             var patient = db.Users.First(a => a.OpenId == paramsDto.OpenId).Patients.FirstOrDefault();
             if (patient.Doctor != null)
             {
-                returnUserInfo.BelongToDoctorId = patient.Doctor.Id.ToString();
+                returnUserInfo.BelongToDoctorId = patient.Doctor.UserId.ToString();
             }
             if (patient.Nurse != null)
             {
-                returnUserInfo.BelongToNurseId = patient.Nurse.Id.ToString();
+                returnUserInfo.BelongToNurseId = patient.Nurse.UserId.ToString();
             }
             Patient returnPatient = new Patient();
+            //Doctor doctor = new Doctor();
+            //Nurse nurse = new Nurse();;
             returnUserInfo.Patient = returnPatient;
             returnUserInfo.Patient.BelongToDoctor = patient.BelongToDoctor;
             returnUserInfo.Patient.BelongToHospital = patient.BelongToHospital;
@@ -235,6 +237,10 @@ namespace KidneyCareApi.Controllers
             returnUserInfo.Patient.CKDLeave = patient.CKDLeave;
             returnUserInfo.Patient.DiseaseType = patient.DiseaseType;
             returnUserInfo.Patient.Id = patient.Id;
+            //returnUserInfo.Patient.Doctor = doctor;
+            //returnUserInfo.Patient.Nurse = nurse;
+            //if (patient.Doctor != null) returnUserInfo.Patient.Doctor.Id = patient.Doctor.Id;
+            //if (patient.Nurse != null) returnUserInfo.Patient.Nurse.Id = patient.Nurse.Id;
 
             var diseasefromdb = db.PatientsDiseases.Where(a => a.PatientId == patient.Id).Select(a => new { a.PatientId, a.DiseaseName, a.DiseaseType, a.DiseaseCode }).ToList();
             List<Dal.PatientsDisease> disease = new List<Dal.PatientsDisease>();
@@ -586,7 +592,8 @@ namespace KidneyCareApi.Controllers
                 a.AttendingDates,
                 a.CognitionName,
                 a.CoursCode,
-                a.CreateTime
+                a.CreateTime,
+                a.Mark
             }).OrderByDescending(a => new { a.AttendingDates, a.CreateTime }).ToList();
 
             return Util.ReturnOkResult(JsonConvert.SerializeObject(courses));
