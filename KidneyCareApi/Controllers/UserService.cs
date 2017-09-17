@@ -130,6 +130,7 @@ namespace KidneyCareApi.Controllers
             returnUserInfo.Sex = user.Sex;
             returnUserInfo.UserType = user.UserType.ToString();
             returnUserInfo.Status = user.Status.ToString();
+            returnUserInfo.Profile = user.Profile;
 
             //判定为医生还是护士
             if ((int)UserType.Doctor == int.Parse(user.UserType.ToString()))
@@ -341,7 +342,11 @@ namespace KidneyCareApi.Controllers
         {
             var db = new Db();
             var user = db.Users.FirstOrDefault(a => a.Id == dto.UserId);
+            user.UpdateTime = DateTime.Now;
+            user.MobilePhone = dto.MobilePhone;
+            user.Sex = dto.Sex;
             user.Profile = dto.Profile;
+            user.UserName = dto.UserName;
             db.SaveChanges();
             return Util.ReturnOkResult(true);
         }
@@ -378,6 +383,7 @@ namespace KidneyCareApi.Controllers
             user.Status = (int)UserStatusType.Registered;
             user.OpenId = dto.OpenId;
             user.UserType = (sbyte)dto.UserType;
+            user.Profile = dto.Profile;
             //user.IdCard = dto.IdCard;
             user.UserName = dto.UserName;
             db.Users.Add(user);
