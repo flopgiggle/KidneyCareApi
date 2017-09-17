@@ -234,11 +234,20 @@ namespace KidneyCareApi.Controllers
 
             var datas = dto.MedicalIndicators;
             var time = "00:00";
+            int age = 20;
+            string sex = "0";
             var brithday = patient.User.Birthday;
-            int y1 = DateTime.Parse(brithday).Year;
-            int y2 = DateTime.Now.Year;
-            int age = y2 - y1;
-            var sex = patient.User.Sex;
+            if (!string.IsNullOrEmpty(brithday))
+            {
+                int y1 = DateTime.Parse(brithday).Year;
+                int y2 = DateTime.Now.Year;
+                age = y2 - y1;
+            }
+            if (!string.IsNullOrEmpty(patient.User.Sex))
+            {
+                sex = patient.User.Sex;
+            }
+
             List<PatientsData> patientsData = new List<PatientsData>();
             //pro
             if (!string.IsNullOrEmpty(datas.Pro))
@@ -405,7 +414,12 @@ namespace KidneyCareApi.Controllers
         public bool IsExceptionData(List<PatientsData> datas,Dal.Patient patient)
         {
             PatientInfo patientInfo = new PatientInfo();
-            var indicator = patientInfo.GetIndicatorInfo(patient.Hospital.Id.ToString(), patient.Id);
+            var hospitalId = "";
+            if (patient.Hospital!=null)
+            {
+                hospitalId = patient.Hospital.Id.ToString();
+            }
+            var indicator = patientInfo.GetIndicatorInfo(hospitalId, patient.Id);
             var isException = false;
             datas.ForEach(a =>
             {

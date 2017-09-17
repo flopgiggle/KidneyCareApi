@@ -72,7 +72,7 @@ namespace KidneyCareApi.Controllers
             item.Accept = "image/webp,image/*,*/*;q=0.8";
             item.ResultType = ResultType.Byte;
             var result = http.GetHtml(item).Html;
-            Util.AddLog(new LogInfo() { Describle = "GetUserInfo" + result });
+            //Util.AddLog(new LogInfo() { Describle = "GetUserInfo" + result });
             var jsonResult = JObject.Parse(result);
             if (jsonResult["openid"] != null)
             {
