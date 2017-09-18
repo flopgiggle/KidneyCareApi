@@ -166,6 +166,8 @@ namespace KidneyCareApi.Controllers
             return Util.ReturnOkResult(JsonConvert.SerializeObject(returnObj));
         }
 
+        
+
         /// <summary>
         /// 向腾讯发起请求获取用户唯一openId
         /// </summary>
@@ -191,6 +193,8 @@ namespace KidneyCareApi.Controllers
             //根据OpenId获取用户信息
             var db = new Db();
             var user = db.Users.FirstOrDefault(a => a.OpenId == paramsDto.OpenId);
+            
+
             //var user = patient.User;
             //查询不到信息则返回空用户信息,则创建一个新的用户
             if (user == null)
@@ -257,6 +261,8 @@ namespace KidneyCareApi.Controllers
                 d.DiseaseType = a.DiseaseType;
                 disease.Add(d);
             });
+            //查询是否有未读消息
+            returnUserInfo.IsRead = !db.Messages.Any(a => a.IsRead == false && a.ToUser == user.Id);
             returnUserInfo.Disease = disease;
             return Util.ReturnOkResult(returnUserInfo);
 
@@ -427,6 +433,7 @@ namespace KidneyCareApi.Controllers
             public bool isException { get; set; }
             public string WxAvatarUrl { get; set; }
             public string LastExceptionDate { get; set; }
+            public bool IsRead { get; set; }
         }
 
 
@@ -455,6 +462,7 @@ namespace KidneyCareApi.Controllers
                         age = "",
                         a.User.WxAvatarUrl,
                         a.LastExceptionDate,
+                        IsRead = a.User.Messages.All(b => b.IsRead != false)
                         //disases = a.PatientsDiseases.Select(b => new {b.DiseaseType, b.DiseaseName})
                     }
                 ).ToList().Select(dmapper.Map<GetPatientListReturnDto>).ToList();
@@ -669,6 +677,8 @@ namespace KidneyCareApi.Controllers
             var LunchBloodGlucose = new List<string>();
             var DinnerBloodGlucose = new List<string>();
             var RandomBloodGlucose = new List<string>();
+            var Weight = new List<string>();
+            var UrineVolume = new List<string>();
             var Date = new List<string>();
 
             dto.Date = Date;
@@ -699,6 +709,12 @@ namespace KidneyCareApi.Controllers
                 var randomBloodGlucose = reportDetailDatas.Where(a => a.RecordDate == currentDay && a.FormType == (int)PatientsDataFormType.RandomBloodGlucose).Select(a => a.DataValue).FirstOrDefault();
                 RandomBloodGlucose.Add(randomBloodGlucose);
 
+                var weight = reportDetailDatas.Where(a => a.RecordDate == currentDay && a.DataCode == (int)PatientsDataType.Weight).Select(a => a.DataValue).FirstOrDefault();
+                Weight.Add(weight);
+
+                var urineVolume = reportDetailDatas.Where(a => a.RecordDate == currentDay && a.DataCode == (int)PatientsDataType.UrineVolume).Select(a => a.DataValue).FirstOrDefault();
+                UrineVolume.Add(urineVolume);
+
                 Date.Add(DateTime.Now.AddDays(-i).ToString("dd") + "日");
             }
 
@@ -726,6 +742,12 @@ namespace KidneyCareApi.Controllers
             dto.RandomBloodGlucose = RandomBloodGlucose;
             if (dto.RandomBloodGlucose.All(a => a == null))
                 dto.RandomBloodGlucose.Add("0");
+            dto.Weight = Weight;
+            if (dto.Weight.All(a => a == null))
+                dto.Weight.Add("0");
+            dto.UrineVolume = UrineVolume;
+            if (dto.UrineVolume.All(a => a == null))
+                dto.UrineVolume.Add("0");
             return Util.ReturnOkResult(dto);
         }
 

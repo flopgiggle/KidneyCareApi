@@ -554,6 +554,7 @@ namespace KidneyCareApi.Dto
         public string Duty { get; set; }
         public int JobTitle { get; set; }
         public string Profile { get; set; }
+        public bool IsRead{ get; set; }
         public Patient Patient { get; set; }
         public Doctor Doctor { get; set; }
         public Nurse Nurse { get; set; }
@@ -841,6 +842,14 @@ namespace KidneyCareApi.Dto
         /// 晚餐后血糖
         /// </summary>
         public List<string> DinnerBloodGlucose { get; set; }
+        /// <summary>
+        /// 体重
+        /// </summary>
+        public List<string> Weight { get; set; }
+        /// <summary>
+        /// 尿量
+        /// </summary>
+        public List<string> UrineVolume { get; set; }
         /// <summary>
         /// 随机血糖
         /// </summary>

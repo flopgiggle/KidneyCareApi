@@ -273,6 +273,7 @@ namespace KidneyCareApi.Controllers
                 mesage.UserType = a.UserType != null?int.Parse(a.UserType.ToString()):0;
                 mesage.CreateTime = a.CreateTime?.ToString("yyyy-MM-dd hh:mm:ss");
                 mesage.Messge = a.Messge;
+                mesage.IsRead = a.IsRead;
                 messageList.Add(mesage);
             });
 
