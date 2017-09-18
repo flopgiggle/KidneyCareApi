@@ -292,14 +292,27 @@ namespace KidneyCareApi.Controllers
         public ResultPakage<List<GetMessageReturnDto>> GetMessageForPatient(GetMssageDto dto)
         {
             var returnDto = GetMessage(dto);
+
             var db = new Db();
+
+
+
             var firstOrDefault = db.Patients.FirstOrDefault(a => a.Id == dto.PatientId);
             if (firstOrDefault != null)
             {
                 var pUserId = firstOrDefault.User.Id;
                 //只查指定两人的对话信息
                 returnDto.Result = returnDto.Result.Where(a => (a.ToUser==dto.UserId || a.ToUser==pUserId) && (a.FromUser == dto.UserId || a.FromUser == pUserId)).ToList();
+                //设置消息为已读
+                var allNotReadMessage = db.Messages.Where(a => a.ToUser == dto.UserId && a.FromUser == pUserId && a.IsRead == false);
+                allNotReadMessage.ForEach(a =>
+                {
+                    a.IsRead = true;
+                });
+                db.SaveChanges();
             }
+
+            
             //db.Users.Add(new User(){Doctors = });
             return returnDto;
         }

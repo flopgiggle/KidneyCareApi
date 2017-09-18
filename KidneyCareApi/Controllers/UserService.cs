@@ -462,7 +462,7 @@ namespace KidneyCareApi.Controllers
                         age = "",
                         a.User.WxAvatarUrl,
                         a.LastExceptionDate,
-                        IsRead = a.User.Messages.All(b => b.IsRead != false)
+                        IsRead = !a.User.Messages.Any(b => b.IsRead == false && b.ToUser == paramsDto.UserId && b.FromUser == a.User.Id)
                         //disases = a.PatientsDiseases.Select(b => new {b.DiseaseType, b.DiseaseName})
                     }
                 ).ToList().Select(dmapper.Map<GetPatientListReturnDto>).ToList();

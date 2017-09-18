@@ -175,11 +175,13 @@ namespace KidneyCareApi.Dto
     /// </summary>
     public class GetPatientListParamsDto
     {
+        //患者id
         public int UserId { get; set; }
         public string UserType { get; set; }
         public string PageIndex { get; set; }
         public string PageSize { get; set; }
         public string Age { get; set; }
+
     }
 
     public class MyRecordDto
@@ -871,6 +873,7 @@ namespace KidneyCareApi.Dto
         public string ReportName { get; set; }
         public string Unit { get; set; }
         public bool IsNomoal { get; set; }
+        public DateTime TimeForOrder { get; set; }
     }
 
     public class  ReportAndHistoryReturnDto{

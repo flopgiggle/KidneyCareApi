@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.Entity;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Web;
@@ -78,8 +79,9 @@ namespace KidneyCareApi.BLL
             var patientData = db.PatientsDatas
                 .Where(a => a.RecordDate.CompareTo(startDate) >= 0 && a.RecordDate.CompareTo(endDate) <= 0 &&
                             a.ReportId == null && a.PatientId == patient.Id)
-                .Select(a => new {a.DataCode, a.DataValue, a.CreateTime, a.RecordTime, a.FormType, a.RecordDate})
-                .OrderByDescending(a => new { a.RecordTime,a.RecordDate,a.CreateTime }).ToList();
+                .Select(a => new {a.DataCode, a.DataValue, a.CreateTime, a.RecordTime, a.FormType, a.RecordDate })
+                .OrderByDescending(a => new { a.RecordDate,a.RecordTime,a.CreateTime }).ToList();
+            var datas = patientData.OrderByDescending(a => DateTime.Parse(a.RecordDate+" "+a.RecordTime));
 
             var reportData = db.Reports
                 .Where(a => a.ReportDate.CompareTo(startDate) >= 0 && a.ReportDate.CompareTo(endDate) <= 0 &&
@@ -123,11 +125,12 @@ namespace KidneyCareApi.BLL
                 MyReport.Add(MyRecordList);
             });
 
+            var mapper = Util.GetDynamicMap();
 
 
             //合并数据
             //Step1 病人当天数据按创建时间进行分组
-            patientData.GroupBy(a => a.CreateTime).ForEach(a =>
+            datas.GroupBy(a => a.CreateTime).ForEach(a =>
             {
                 var MyRecordList = new List<CurrentInfoListDto>();
                 a.ForEach(item =>
@@ -142,6 +145,7 @@ namespace KidneyCareApi.BLL
                         oneReturnDto.DataValue = item.DataValue;
                         oneReturnDto.RecordTime = item.RecordTime;
                         oneReturnDto.RecordDate = item.RecordDate;
+                        oneReturnDto.TimeForOrder = DateTime.Parse(item.RecordDate+" "+ item.RecordTime);
                         //如果有表单类型0，则说明为自定义表单字段，需要恢复设置的表单值
                         if (item.FormType != 0)
                             oneReturnDto.DataName = GetNameByFormType(item.FormType ?? 0);
