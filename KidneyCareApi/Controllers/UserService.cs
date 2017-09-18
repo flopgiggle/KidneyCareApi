@@ -807,6 +807,10 @@ namespace KidneyCareApi.Controllers
             //                               .SelectMany(a => a.PatientsDatas.GroupBy(b=>new {b.RecordDate,b.DataCode})
             //                                        .Select(c => new { RecordDate = c.Max(x => x.RecordDate), RecordTime =c.Max(x=>x.RecordTime), DataCode = c.Max(x => x.DataCode), DataValue = c.Max(x => x.DataValue), CreateTime = c.Max(x => x.CreateTime) })).ToList();
 
+            PatientInfo pt = new PatientInfo();
+            //缓存性能优化处
+            var indicate = pt.GetIndicatorInfo();
+            
             //根据指标类型进行数据分类
             reportDetailDatas.GroupBy(a => a.DataCode).ForEach(a =>
             {
@@ -818,7 +822,16 @@ namespace KidneyCareApi.Controllers
                     Xxdata.Add(item.RecordDate);
                     Values.Add(item.DataValue);
                     historyDto.Name = PatientInfo.GetNameByCode(item.DataCode ?? 9);
-                    historyDto.UnitName = "待定";
+                    var firstOrDefault = indicate.FirstOrDefault(b => b.DataCode == item.DataCode);
+                    if (firstOrDefault != null)
+                    {
+                        historyDto.UnitName = firstOrDefault.Unit;
+                    }
+                    else
+                    {
+                        historyDto.UnitName = "未配置";
+                    }
+
                     historyDto.DataCode = "code" + item.DataCode;
                 });
                 historyDto.Values = Values;

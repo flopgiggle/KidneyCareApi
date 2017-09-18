@@ -208,7 +208,7 @@ namespace KidneyCareApi.BLL
         /// <param name="hospitalId"></param>
         /// <param name="patientId"></param>
         /// <returns></returns>
-        public List<IndicatorsRange> GetIndicatorInfo(string hospitalId, int patientId)
+        public List<IndicatorsRange> GetIndicatorInfo(string hospitalId="", int patientId=0)
         {
             //查询当前病人的标准指标信息
             //如果当期病人没有绑定医院信息，则默认使用华西医院的标准指标

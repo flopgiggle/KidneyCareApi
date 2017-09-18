@@ -184,25 +184,25 @@ namespace KidneyCareApi.Controllers
             //141*power((to_number(肌酐/79.56）,(-0.411))*power((0.993),年龄）       其中power是指开方，to_number是指取整数
             if (sex == 0 && SCr <=79.56)
             {
-                return Math.Round((141*Math.Pow((int) (SCr / 79.56), -0.411) * Math.Pow((0.993), age)),2).ToString(CultureInfo.InvariantCulture);
+                return Math.Round((141*Math.Pow((SCr / 79.56), -0.411) * Math.Pow((0.993), age)),2).ToString(CultureInfo.InvariantCulture);
             }
 
             //141*power((to_number(肌酐/79.56）,(-1.209))*power((0.993),年龄）
             if (sex == 0 && SCr > 79.56)
             {
-                return Math.Round((141 * Math.Pow((int)(SCr / 79.56), -1.209) * Math.Pow((0.993), age)),2).ToString(CultureInfo.InvariantCulture);
+                return Math.Round((141 * Math.Pow((SCr / 79.56), -1.209) * Math.Pow((0.993), age)),2).ToString(CultureInfo.InvariantCulture);
             }
 
             //144*power((to_number(肌酐/61.88）,(-0.329))*power((0.993),年龄）
             if (sex == 1 && SCr <= 61.88)
             {
-                return Math.Round((141 * Math.Pow((int)(SCr / 61.88), -0.329) * Math.Pow((0.993), age)), 2).ToString(CultureInfo.InvariantCulture);
+                return Math.Round((141 * Math.Pow((SCr / 61.88), -0.329) * Math.Pow((0.993), age)), 2).ToString(CultureInfo.InvariantCulture);
             }
 
             //144*power((to_number(肌酐/61.88）,(-1.209))*power((0.993),年龄）
             if (sex == 1 && SCr > 61.88)
             {
-                return Math.Round((141 * Math.Pow((int)(SCr / 61.88), -1.209) * Math.Pow((0.993), age)), 2).ToString(CultureInfo.InvariantCulture);
+                return Math.Round((141 * Math.Pow((SCr / 61.88), -1.209) * Math.Pow((0.993), age)), 2).ToString(CultureInfo.InvariantCulture);
             }
             return "";
         }
