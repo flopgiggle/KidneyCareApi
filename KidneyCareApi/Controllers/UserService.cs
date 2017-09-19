@@ -685,34 +685,34 @@ namespace KidneyCareApi.Controllers
             for (var i = 6; i > -1; i--)
             {
                 var currentDay = DateTime.Now.AddDays(-i).ToString("yyyy-MM-dd");
-                var systolicPressure = reportDetailDatas.Where(a => a.RecordDate == currentDay && a.DataCode == (int)PatientsDataType.SystolicPressure).Select(a => a.DataValue).FirstOrDefault();
+                var systolicPressure = reportDetailDatas.Where(a => a.RecordDate == currentDay && a.DataCode == (int)PatientsDataType.SystolicPressure).Select(a => a.DataValue).Max();
                 SystolicPressure.Add(systolicPressure);
 
-                var diastolicPressure = reportDetailDatas.Where(a => a.RecordDate == currentDay && a.DataCode == (int)PatientsDataType.DiastolicPressure).Select(a => a.DataValue).FirstOrDefault();
+                var diastolicPressure = reportDetailDatas.Where(a => a.RecordDate == currentDay && a.DataCode == (int)PatientsDataType.DiastolicPressure).Select(a => a.DataValue).Max();
                 DiastolicPressure.Add(diastolicPressure);
 
-                var heartRate = reportDetailDatas.Where(a => a.RecordDate == currentDay && a.DataCode == (int)PatientsDataType.HeartRate).Select(a => a.DataValue).FirstOrDefault();
+                var heartRate = reportDetailDatas.Where(a => a.RecordDate == currentDay && a.DataCode == (int)PatientsDataType.HeartRate).Select(a => a.DataValue).Max();
                 HeartRate.Add(heartRate);
 
-                var fastingBloodGlucose = reportDetailDatas.Where(a => a.RecordDate == currentDay && a.FormType == (int)PatientsDataFormType.FastingBloodGlucose).Select(a => a.DataValue).FirstOrDefault();
+                var fastingBloodGlucose = reportDetailDatas.Where(a => a.RecordDate == currentDay && a.FormType == (int)PatientsDataFormType.FastingBloodGlucose).Select(a => a.DataValue).Max();
                 FastingBloodGlucose.Add(fastingBloodGlucose);
 
-                var breakfastBloodGlucose = reportDetailDatas.Where(a => a.RecordDate == currentDay && a.FormType == (int)PatientsDataFormType.BreakfastBloodGlucose).Select(a => a.DataValue).FirstOrDefault();
+                var breakfastBloodGlucose = reportDetailDatas.Where(a => a.RecordDate == currentDay && a.FormType == (int)PatientsDataFormType.BreakfastBloodGlucose).Select(a => a.DataValue).Max();
                 BreakfastBloodGlucose.Add(breakfastBloodGlucose);
 
-                var lunchBloodGlucose = reportDetailDatas.Where(a => a.RecordDate == currentDay && a.FormType == (int)PatientsDataFormType.LunchBloodGlucose).Select(a => a.DataValue).FirstOrDefault();
+                var lunchBloodGlucose = reportDetailDatas.Where(a => a.RecordDate == currentDay && a.FormType == (int)PatientsDataFormType.LunchBloodGlucose).Select(a => a.DataValue).Max();
                 LunchBloodGlucose.Add(lunchBloodGlucose);
 
-                var dinnerBloodGlucose = reportDetailDatas.Where(a => a.RecordDate == currentDay && a.FormType == (int)PatientsDataFormType.DinnerBloodGlucose).Select(a => a.DataValue).FirstOrDefault();
+                var dinnerBloodGlucose = reportDetailDatas.Where(a => a.RecordDate == currentDay && a.FormType == (int)PatientsDataFormType.DinnerBloodGlucose).Select(a => a.DataValue).Max();
                 DinnerBloodGlucose.Add(dinnerBloodGlucose);
 
-                var randomBloodGlucose = reportDetailDatas.Where(a => a.RecordDate == currentDay && a.FormType == (int)PatientsDataFormType.RandomBloodGlucose).Select(a => a.DataValue).FirstOrDefault();
+                var randomBloodGlucose = reportDetailDatas.Where(a => a.RecordDate == currentDay && a.DataCode == (int)PatientsDataType.RBG).Select(a => a.DataValue).Max();
                 RandomBloodGlucose.Add(randomBloodGlucose);
 
-                var weight = reportDetailDatas.Where(a => a.RecordDate == currentDay && a.DataCode == (int)PatientsDataType.Weight).Select(a => a.DataValue).FirstOrDefault();
+                var weight = reportDetailDatas.Where(a => a.RecordDate == currentDay && a.DataCode == (int)PatientsDataType.Weight).Select(a => a.DataValue).Max();
                 Weight.Add(weight);
 
-                var urineVolume = reportDetailDatas.Where(a => a.RecordDate == currentDay && a.DataCode == (int)PatientsDataType.UrineVolume).Select(a => a.DataValue).FirstOrDefault();
+                var urineVolume = reportDetailDatas.Where(a => a.RecordDate == currentDay && a.DataCode == (int)PatientsDataType.UrineVolume).Select(a => a.DataValue).Max();
                 UrineVolume.Add(urineVolume);
 
                 Date.Add(DateTime.Now.AddDays(-i).ToString("dd") + "日");
@@ -812,10 +812,16 @@ namespace KidneyCareApi.Controllers
                 repotList.Add(reportDto);
             });
 
+            reportAndHistoryReturnDto.ReportItem = repotList.OrderByDescending(a => DateTime.Parse(a.ReportDate)).ToList();
 
 
             //获取当年的所有指标记录,如果一天中有重复的则取最新的一次结果
-            var reportDetailDatas = db.PatientsDatas.Where(a => a.PatientId == patient.Id && a.Report.PatientId == patient.Id)
+            //排除文本类型的报告，因为图标不支持文本类型报告的显示
+            var pro = (int) PatientsDataType.Pro;
+            var ery = (int) PatientsDataType.ERY;
+            var leu = (int)PatientsDataType.LEU;
+
+            var reportDetailDatas = db.PatientsDatas.Where(a => a.PatientId == patient.Id && a.Report.PatientId == patient.Id && a.DataCode!= pro && a.DataCode != ery && a.DataCode != leu && a.ReportId !=1)
                 .GroupBy(b => new { b.RecordDate, b.DataCode }).Select(c => new
                 {
                     RecordDate = c.Max(x => x.RecordDate),
