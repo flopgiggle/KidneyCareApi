@@ -220,6 +220,7 @@ namespace KidneyCareApi.Controllers
             returnUserInfo.MobilePhone = user.MobilePhone;
             returnUserInfo.IdCard = user.IdCard;
             returnUserInfo.OpenId = user.OpenId;
+            returnUserInfo.Height = user.Height;
             returnUserInfo.Sex = user.Sex;
             returnUserInfo.Status = user.Status.ToString();
             var patient = db.Users.First(a => a.OpenId == paramsDto.OpenId).Patients.FirstOrDefault();
@@ -312,6 +313,7 @@ namespace KidneyCareApi.Controllers
             user.IdCard = dto.IdCard;
             user.UserName = dto.UserName;
             user.WxAvatarUrl = dto.WxAvatarUrl;
+            user.Height = dto.Height;
 
             //获取病人并且设置病人信息
             var patient = db.Users.First(a => a.OpenId == dto.OpenId).Patients.First();

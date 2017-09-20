@@ -106,10 +106,15 @@ namespace KidneyCareApi.Controllers
                     dto.RecordDate, patient, datetime);
                 db.PatientsDatas.Add(BodyWeight);
                 patientsData.Add(BodyWeight);
+
+                //如果填写了体重，则自动计算BMI值
+                var bmiValue = double.Parse(dto.BodyWeight) / (patient.User.Height* patient.User.Height/10000);
+                var bmi = GetPatientsData(PatientsDataType.BMI, Math.Round(bmiValue??0, 2).ToString(CultureInfo.InvariantCulture), dto.RecordTime,
+                    dto.RecordDate, patient, datetime);
+                db.PatientsDatas.Add(bmi);
+                patientsData.Add(bmi);
+
             }
-
-
-
 
             if (dto.FastingBloodGlucose != "")
             {

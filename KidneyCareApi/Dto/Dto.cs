@@ -139,7 +139,8 @@ namespace KidneyCareApi.Dto
         public int JobTitle { get; set; }
         public string Profile { get; set; }
         public string WxAvatarUrl { get; set; }
-        
+        public double Height { get; set; }
+
         public List<Dal.PatientsDisease> Disease { get; set; }
     }
 
@@ -535,7 +536,11 @@ namespace KidneyCareApi.Dto
         /// </summary>
         [Description("尿蛋白定量")]
         Upr = 28,
-        
+        /// <summary>
+        ///     体重
+        /// </summary>
+        [Description("BMI")]
+        BMI = 29,
 
     }
 
@@ -555,6 +560,7 @@ namespace KidneyCareApi.Dto
         public string OpenId { get; set; }
         public string Duty { get; set; }
         public int JobTitle { get; set; }
+        public double? Height { get; set; }
         public string Profile { get; set; }
         public bool IsRead{ get; set; }
         public Patient Patient { get; set; }
