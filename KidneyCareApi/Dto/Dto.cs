@@ -866,6 +866,10 @@ namespace KidneyCareApi.Dto
         /// 日期
         /// </summary>
         public List<string> Date { get; set; }
+        /// <summary>
+        /// BMI
+        /// </summary>
+        public List<string> BMI { get; set; }
     }
 
     public class CurrentInfoListDto

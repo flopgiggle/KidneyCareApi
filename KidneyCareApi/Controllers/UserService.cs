@@ -681,6 +681,7 @@ namespace KidneyCareApi.Controllers
             var RandomBloodGlucose = new List<string>();
             var Weight = new List<string>();
             var UrineVolume = new List<string>();
+            var BMI = new List<string>();
             var Date = new List<string>();
 
             dto.Date = Date;
@@ -717,39 +718,45 @@ namespace KidneyCareApi.Controllers
                 var urineVolume = reportDetailDatas.Where(a => a.RecordDate == currentDay && a.DataCode == (int)PatientsDataType.UrineVolume).Select(a => a.DataValue).Max();
                 UrineVolume.Add(urineVolume);
 
+                var bmi = reportDetailDatas.Where(a => a.RecordDate == currentDay && a.DataCode == (int)PatientsDataType.BMI).Select(a => a.DataValue).Max();
+                BMI.Add(bmi);
+
                 Date.Add(DateTime.Now.AddDays(-i).ToString("dd") + "日");
             }
 
             dto.SystolicPressure = SystolicPressure;
             if (dto.SystolicPressure.All(a => a == null))
-                dto.SystolicPressure.Add("0");
+                dto.SystolicPressure.Clear();
             dto.DiastolicPressure = DiastolicPressure;
             if (dto.DiastolicPressure.All(a => a == null))
-                dto.DiastolicPressure.Add("0");
+                dto.DiastolicPressure.Clear();
             dto.HeartRate = HeartRate;
             if (dto.HeartRate.All(a => a == null))
-                dto.HeartRate.Add("0");
+                dto.HeartRate.Clear();
             dto.FastingBloodGlucose = FastingBloodGlucose;
             if (dto.FastingBloodGlucose.All(a => a == null))
-                dto.FastingBloodGlucose.Add("0");
+                dto.FastingBloodGlucose.Clear();
             dto.BreakfastBloodGlucose = BreakfastBloodGlucose;
             if (dto.BreakfastBloodGlucose.All(a => a == null))
-                dto.BreakfastBloodGlucose.Add("0");
+                dto.BreakfastBloodGlucose.Clear();
             dto.LunchBloodGlucose = LunchBloodGlucose;
             if (dto.LunchBloodGlucose.All(a => a == null))
-                dto.LunchBloodGlucose.Add("0");
+                dto.LunchBloodGlucose.Clear();
             dto.DinnerBloodGlucose = DinnerBloodGlucose;
             if (dto.DinnerBloodGlucose.All(a => a == null))
-                dto.DinnerBloodGlucose.Add("0");
+                dto.DinnerBloodGlucose.Clear();
             dto.RandomBloodGlucose = RandomBloodGlucose;
             if (dto.RandomBloodGlucose.All(a => a == null))
-                dto.RandomBloodGlucose.Add("0");
+                dto.RandomBloodGlucose.Clear();
             dto.Weight = Weight;
             if (dto.Weight.All(a => a == null))
-                dto.Weight.Add("0");
+                dto.Weight.Clear();
             dto.UrineVolume = UrineVolume;
             if (dto.UrineVolume.All(a => a == null))
-                dto.UrineVolume.Add("0");
+                dto.UrineVolume.Clear();
+            dto.BMI = BMI;
+            if (dto.BMI.All(a => a == null))
+                dto.BMI.Clear();
             return Util.ReturnOkResult(dto);
         }
 
