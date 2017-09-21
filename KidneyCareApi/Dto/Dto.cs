@@ -271,6 +271,12 @@ namespace KidneyCareApi.Dto
         public string ImageUrl { get; set; }
 
         /// <summary>
+        /// 报告图片地址
+        /// </summary>
+        public List<string> ImageUrls { get; set; }
+
+
+        /// <summary>
         /// 体重
         /// </summary>
         public string Weight { get; set; }

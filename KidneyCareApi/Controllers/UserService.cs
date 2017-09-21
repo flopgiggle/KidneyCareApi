@@ -810,16 +810,57 @@ namespace KidneyCareApi.Controllers
             var endDate = year + "-" + "12" + "-" + "31";
             //查询病人历史的数据
             //病人当年的所有的报告信息
-            var reportData = db.Reports.Where(a => a.ReportDate.CompareTo(startDate) > 0 && a.ReportDate.CompareTo(endDate) < 0 && a.PatientId == patient.Id).Select(a => new { a.CreateTime, a.ReportType, a.ReportDate, a.ImageUrl }).ToList();
+            var reportData = db.Reports.Where(a => a.ReportDate.CompareTo(startDate) > 0 && a.ReportDate.CompareTo(endDate) < 0 && a.PatientId == patient.Id).Select(a => new { a.CreateTime, a.ReportType, a.ReportDate, a.ImageUrl,a.ImageUrl1,a.ImageUrl2,a.ImageUrl3,a.ImageUrl4,a.ImageUrl5,a.ImageUrl6,a.ImageUrl7,a.ImageUrl8 }).ToList();
 
             reportData.ForEach(a =>
             {
+                List<string> images = new List<string>();
+                if (!string.IsNullOrEmpty(a.ImageUrl))
+                {
+                    images.Add(a.ImageUrl);
+                }
+                if (!string.IsNullOrEmpty(a.ImageUrl1))
+                {
+                    images.Add(a.ImageUrl1);
+                }
+                if (!string.IsNullOrEmpty(a.ImageUrl2))
+                {
+                    images.Add(a.ImageUrl2);
+                }
+                if (!string.IsNullOrEmpty(a.ImageUrl3))
+                {
+                    images.Add(a.ImageUrl3);
+                }
+                if (!string.IsNullOrEmpty(a.ImageUrl4))
+                {
+                    images.Add(a.ImageUrl4);
+                }
+                if (!string.IsNullOrEmpty(a.ImageUrl5))
+                {
+                    images.Add(a.ImageUrl5);
+                }
+                if (!string.IsNullOrEmpty(a.ImageUrl6))
+                {
+                    images.Add(a.ImageUrl6);
+                }
+                if (!string.IsNullOrEmpty(a.ImageUrl7))
+                {
+                    images.Add(a.ImageUrl7);
+                }
+                if (!string.IsNullOrEmpty(a.ImageUrl8))
+                {
+                    images.Add(a.ImageUrl8);
+                }
+
                 var reportDto = new ReportDto();
                 reportDto.ReportDate = a.ReportDate;
                 reportDto.ReportType = PatientInfo.GetNameByReportType(a.ReportType ?? 0);
                 reportDto.ImageUrl = a.ImageUrl;
+                reportDto.ImageUrls = images;
                 repotList.Add(reportDto);
             });
+
+            
 
             reportAndHistoryReturnDto.ReportItem = repotList.OrderByDescending(a => DateTime.Parse(a.ReportDate)).ToList();
 
