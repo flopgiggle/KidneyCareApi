@@ -62,12 +62,12 @@ namespace KidneyCareApi.Controllers
         /// 获取OpenId
         /// </summary>
         /// <returns></returns>
-        public string GetOpenIdByCode(string code,string appId,string secret)
+        public string GetOpenIdByCode(string code, string appId, string secret)
         {
             string openId = "";
             var http = new HttpHelper();
             var item = GetHttpItem();
-            item.URL = "https://api.weixin.qq.com/sns/jscode2session?appid="+ appId + "&secret="+ secret + "&js_code=" + code + "&grant_type=authorization_code";
+            item.URL = "https://api.weixin.qq.com/sns/jscode2session?appid=" + appId + "&secret=" + secret + "&js_code=" + code + "&grant_type=authorization_code";
             item.Method = "get";
             item.Accept = "image/webp,image/*,*/*;q=0.8";
             item.ResultType = ResultType.Byte;
@@ -161,12 +161,12 @@ namespace KidneyCareApi.Controllers
             Db db = new Db();
             var disease = db.PatientsDiseases.Where(a => a.PatientId == patientId).Select(a => new { a.PatientId, a.DiseaseName, a.DiseaseType, a.DiseaseCode }).ToList();
             var course = db.PatientsCourses.Where(a => a.PaitentId == patientId).Select(a => new { a.PaitentId, a.CoursCode, a.CoursName }).ToList();
-            var patientBaseInfo = db.Patients.Where(a => a.Id == patientId).Select(a => new { a.CKDLeave,a.User.UserName,a.User.Birthday,a.User.Sex,a.User.WxAvatarUrl }).FirstOrDefault();
+            var patientBaseInfo = db.Patients.Where(a => a.Id == patientId).Select(a => new { a.CKDLeave, a.User.UserName, a.User.Birthday, a.User.Sex, a.User.WxAvatarUrl }).FirstOrDefault();
             var returnObj = new { disease, course, patientBaseInfo };
             return Util.ReturnOkResult(JsonConvert.SerializeObject(returnObj));
         }
 
-        
+
 
         /// <summary>
         /// 向腾讯发起请求获取用户唯一openId
@@ -193,7 +193,7 @@ namespace KidneyCareApi.Controllers
             //根据OpenId获取用户信息
             var db = new Db();
             var user = db.Users.FirstOrDefault(a => a.OpenId == paramsDto.OpenId);
-            
+
 
             //var user = patient.User;
             //查询不到信息则返回空用户信息,则创建一个新的用户
@@ -454,19 +454,19 @@ namespace KidneyCareApi.Controllers
             var patients = db.Patients
                 .Where(a => (a.Doctor.User.Id == paramsDto.UserId || a.Nurse.User.Id == paramsDto.UserId))
                 .Select(a => new
-                    {
-                        a.User.Id,
-                        a.User.Sex,
-                        a.User.Birthday,
-                        a.User.UserName,
-                        a.CKDLeave,
-                        patientId = a.Id,
-                        age = "",
-                        a.User.WxAvatarUrl,
-                        a.LastExceptionDate,
-                        IsRead = !a.User.Messages.Any(b => b.IsRead == false && b.ToUser == paramsDto.UserId && b.FromUser == a.User.Id)
-                        //disases = a.PatientsDiseases.Select(b => new {b.DiseaseType, b.DiseaseName})
-                    }
+                {
+                    a.User.Id,
+                    a.User.Sex,
+                    a.User.Birthday,
+                    a.User.UserName,
+                    a.CKDLeave,
+                    patientId = a.Id,
+                    age = "",
+                    a.User.WxAvatarUrl,
+                    a.LastExceptionDate,
+                    IsRead = !a.User.Messages.Any(b => b.IsRead == false && b.ToUser == paramsDto.UserId && b.FromUser == a.User.Id)
+                    //disases = a.PatientsDiseases.Select(b => new {b.DiseaseType, b.DiseaseName})
+                }
                 ).ToList().Select(dmapper.Map<GetPatientListReturnDto>).ToList();
 
             var startDate = DateTime.Now.AddDays(-30).ToString("yyyy-MM-dd");
@@ -534,7 +534,7 @@ namespace KidneyCareApi.Controllers
         /// <returns></returns>
         [HttpGet]
         [Route("getExcpetRecordInfoList/{startDate}/{endDate}/{patientId}")]
-        public ResultPakage<CurrentInfoReturnDto> GetExcpetRecordInfoList(string startDate,string endDate, int patientId)
+        public ResultPakage<CurrentInfoReturnDto> GetExcpetRecordInfoList(string startDate, string endDate, int patientId)
         {
             Db db = new Db();
             var openid = db.Patients.Where(a => a.Id == patientId).Select(a => a.User.OpenId).FirstOrDefault();
@@ -545,12 +545,12 @@ namespace KidneyCareApi.Controllers
             //移除正常指标，只看异常的
 
 
-            var newrecord = list.Result.MyRecord.Select(a => a.Where(b => b.IsNomoal == false).ToList()).Where(a=>a.Count>0).ToList();
+            var newrecord = list.Result.MyRecord.Select(a => a.Where(b => b.IsNomoal == false).ToList()).Where(a => a.Count > 0).ToList();
             list.Result.MyRecord = newrecord;
 
 
 
-            var newreport = list.Result.MyReport.Select(a => a.Where(b => b.IsNomoal == false || b.ReportName!= null).ToList()).Where(a => a.Count>1).ToList();
+            var newreport = list.Result.MyReport.Select(a => a.Where(b => b.IsNomoal == false || b.ReportName != null).ToList()).Where(a => a.Count > 1).ToList();
             list.Result.MyReport = newreport;
             return list;
         }
@@ -631,12 +631,12 @@ namespace KidneyCareApi.Controllers
 
         [HttpGet]
         [Route("getHospitalSelectInfo/{province}/{city}")]
-        public ResultPakage<string> getHospitalSelectInfo(string province,string city)
+        public ResultPakage<string> getHospitalSelectInfo(string province, string city)
         {
             Db db = new Db();
-            var provinces = db.Provinces.Where(a=>a.ProvinceName=="四川省").Select(a => new {Name = a.ProvinceName,Id=a.ProvinceCode}).ToList();
-            var citys = db.Cities.Where(a =>(a.CityName=="成都市"||a.CityName=="绵阳市") && a.ProvinceCode == province).Select(a => new { Name = a.CityName, Id = a.CityCode }).ToList();
-            var hospital = db.Hospitals.Where(a => a.CityCode == city).Select(a => new {Name = a.Name, Id = a.Id}).ToList();
+            var provinces = db.Provinces.Where(a => a.ProvinceName == "四川省").Select(a => new { Name = a.ProvinceName, Id = a.ProvinceCode }).ToList();
+            var citys = db.Cities.Where(a => (a.CityName == "成都市" || a.CityName == "绵阳市") && a.ProvinceCode == province).Select(a => new { Name = a.CityName, Id = a.CityCode }).ToList();
+            var hospital = db.Hospitals.Where(a => a.CityCode == city).Select(a => new { Name = a.Name, Id = a.Id }).ToList();
             return Util.ReturnOkResult(JsonConvert.SerializeObject(new { provinces, citys, hospital }));
         }
 
@@ -656,7 +656,7 @@ namespace KidneyCareApi.Controllers
             var db = new Db();
             var dto = new GetMyRecordHistoryDto();
             //查询当前日期7天之内的数据
-            var startDate = DateTime.Now.AddDays(-7).ToString("yyyy-MM-dd");
+            var startDate = DateTime.Now.AddDays(-30).ToString("yyyy-MM-dd");
 
             //病人最近7天的所有的报告信息,每天只取一个记录，且该记录为一天中最新的一个
             var reportDetailDatas = db.PatientsDatas.Where(a => a.PatientId == patient.Id && a.ReportId == null && a.RecordDate.CompareTo(startDate) > 0)
@@ -685,7 +685,7 @@ namespace KidneyCareApi.Controllers
             var Date = new List<string>();
 
             dto.Date = Date;
-            for (var i = 6; i > -1; i--)
+            for (var i = 29; i > -1; i--)
             {
                 var currentDay = DateTime.Now.AddDays(-i).ToString("yyyy-MM-dd");
                 var systolicPressure = reportDetailDatas.Where(a => a.RecordDate == currentDay && a.DataCode == (int)PatientsDataType.SystolicPressure).Select(a => a.DataValue).Max();
@@ -721,7 +721,7 @@ namespace KidneyCareApi.Controllers
                 var bmi = reportDetailDatas.Where(a => a.RecordDate == currentDay && a.DataCode == (int)PatientsDataType.BMI).Select(a => a.DataValue).Max();
                 BMI.Add(bmi);
 
-                Date.Add(DateTime.Now.AddDays(-i).ToString("dd") + "日");
+                Date.Add(DateTime.Now.AddDays(-i).ToString("dd"));
             }
 
             dto.SystolicPressure = SystolicPressure;
@@ -810,7 +810,23 @@ namespace KidneyCareApi.Controllers
             var endDate = year + "-" + "12" + "-" + "31";
             //查询病人历史的数据
             //病人当年的所有的报告信息
-            var reportData = db.Reports.Where(a => a.ReportDate.CompareTo(startDate) > 0 && a.ReportDate.CompareTo(endDate) < 0 && a.PatientId == patient.Id).Select(a => new { a.CreateTime, a.ReportType, a.ReportDate, a.ImageUrl,a.ImageUrl1,a.ImageUrl2,a.ImageUrl3,a.ImageUrl4,a.ImageUrl5,a.ImageUrl6,a.ImageUrl7,a.ImageUrl8 }).ToList();
+            var reportData = db.Reports
+                .Where(a => a.ReportDate.CompareTo(startDate) > 0 && a.ReportDate.CompareTo(endDate) < 0 && a.PatientId == patient.Id)
+                .Select(a => new
+                {
+                    a.CreateTime,
+                    a.ReportType,
+                    a.ReportDate,
+                    a.ImageUrl,
+                    a.ImageUrl1,
+                    a.ImageUrl2,
+                    a.ImageUrl3,
+                    a.ImageUrl4,
+                    a.ImageUrl5,
+                    a.ImageUrl6,
+                    a.ImageUrl7,
+                    a.ImageUrl8
+                }).ToList();
 
             reportData.ForEach(a =>
             {
@@ -860,18 +876,19 @@ namespace KidneyCareApi.Controllers
                 repotList.Add(reportDto);
             });
 
-            
+
 
             reportAndHistoryReturnDto.ReportItem = repotList.OrderByDescending(a => DateTime.Parse(a.ReportDate)).ToList();
 
 
             //获取当年的所有指标记录,如果一天中有重复的则取最新的一次结果
             //排除文本类型的报告，因为图标不支持文本类型报告的显示
-            var pro = (int) PatientsDataType.Pro;
-            var ery = (int) PatientsDataType.ERY;
+            var pro = (int)PatientsDataType.Pro;
+            var ery = (int)PatientsDataType.ERY;
             var leu = (int)PatientsDataType.LEU;
 
-            var reportDetailDatas = db.PatientsDatas.Where(a => a.PatientId == patient.Id && a.Report.PatientId == patient.Id && a.DataCode!= pro && a.DataCode != ery && a.DataCode != leu && a.ReportId !=1)
+            var reportDetailDatas = db.PatientsDatas
+                .Where(a => a.PatientId == patient.Id && a.Report.PatientId == patient.Id && a.DataCode != pro && a.DataCode != ery && a.DataCode != leu && a.ReportId != 1)
                 .GroupBy(b => new { b.RecordDate, b.DataCode }).Select(c => new
                 {
                     RecordDate = c.Max(x => x.RecordDate),
@@ -888,7 +905,7 @@ namespace KidneyCareApi.Controllers
             PatientInfo pt = new PatientInfo();
             //缓存性能优化处
             var indicate = pt.GetIndicatorInfo();
-            
+
             //根据指标类型进行数据分类
             reportDetailDatas.GroupBy(a => a.DataCode).ForEach(a =>
             {
