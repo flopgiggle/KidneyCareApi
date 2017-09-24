@@ -7,7 +7,7 @@
   <PropertyGroup>
     <TimeStampOfAssociatedLegacyPublishXmlFile />
     <_NewBackgroundProfile>True</_NewBackgroundProfile>
-    <_PublishTargetUrl>F:\小程序开发\KidneyCareApi\KidneyCareApi\bin\Release\PublishOutput</_PublishTargetUrl>
+    <_PublishTargetUrl>F:\小程序开发\kidneyCareApi\KidneyCareApi\bin\Release\PublishOutput</_PublishTargetUrl>
   </PropertyGroup>
   <ItemGroup>
     <File Include="ApplicationInsights.config">
@@ -95,10 +95,10 @@
       <publishTime>09/11/2013 09:10:04</publishTime>
     </File>
     <File Include="bin/KidneyCareApi.dll">
-      <publishTime>09/17/2017 19:08:56</publishTime>
+      <publishTime>09/24/2017 19:34:44</publishTime>
     </File>
     <File Include="bin/KidneyCareApi.pdb">
-      <publishTime>09/17/2017 19:08:56</publishTime>
+      <publishTime>09/24/2017 19:34:44</publishTime>
     </File>
     <File Include="bin/Microsoft.AI.Agent.Intercept.dll">
       <publishTime>11/30/2016 16:07:42</publishTime>
@@ -214,6 +214,30 @@
     <File Include="bin/roslyn/VBCSCompiler.exe.config">
       <publishTime>06/27/2016 14:50:24</publishTime>
     </File>
+    <File Include="bin/ServiceStack.Common.dll">
+      <publishTime>07/03/2016 18:43:46</publishTime>
+    </File>
+    <File Include="bin/ServiceStack.dll">
+      <publishTime>07/03/2016 18:43:46</publishTime>
+    </File>
+    <File Include="bin/ServiceStack.Interfaces.dll">
+      <publishTime>07/03/2016 18:43:46</publishTime>
+    </File>
+    <File Include="bin/ServiceStack.OrmLite.dll">
+      <publishTime>07/03/2016 18:43:46</publishTime>
+    </File>
+    <File Include="bin/ServiceStack.OrmLite.SqlServer.dll">
+      <publishTime>07/03/2016 18:43:46</publishTime>
+    </File>
+    <File Include="bin/ServiceStack.Redis.dll">
+      <publishTime>07/03/2016 18:43:46</publishTime>
+    </File>
+    <File Include="bin/ServiceStack.ServiceInterface.dll">
+      <publishTime>07/03/2016 18:43:46</publishTime>
+    </File>
+    <File Include="bin/ServiceStack.Text.dll">
+      <publishTime>07/03/2016 18:43:46</publishTime>
+    </File>
     <File Include="bin/System.Net.Http.Formatting.dll">
       <publishTime>01/28/2015 04:02:42</publishTime>
     </File>
@@ -311,7 +335,7 @@
       <publishTime>08/29/2017 22:30:59</publishTime>
     </File>
     <File Include="packages.config">
-      <publishTime>09/17/2017 11:36:00</publishTime>
+      <publishTime>09/24/2017 15:58:25</publishTime>
     </File>
     <File Include="Scripts/bootstrap.js">
       <publishTime>08/29/2017 22:31:07</publishTime>
@@ -356,7 +380,7 @@
       <publishTime>08/29/2017 22:30:59</publishTime>
     </File>
     <File Include="Web.config">
-      <publishTime>09/17/2017 19:08:57</publishTime>
+      <publishTime>09/24/2017 18:12:24</publishTime>
     </File>
   </ItemGroup>
 </Project>

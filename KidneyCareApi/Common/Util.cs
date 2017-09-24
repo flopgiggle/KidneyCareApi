@@ -630,11 +630,11 @@ namespace KidneyCareApi.Common
         }
 
 
-        //public static ICacheHelper GetCacheClient()
-        //{
-        //    ICacheHelper client = new RedisCacheHelper();
-        //    return client;
-        //}
+        public static ICacheHelper GetCacheClient()
+        {
+            ICacheHelper client = new RedisCacheHelper();
+            return client;
+        }
 
         /// <summary>
         /// 获取描述信息
@@ -659,20 +659,20 @@ namespace KidneyCareApi.Common
         /// <summary>
         /// 获取请求线程内的唯一缓存对象
         /// </summary>
-        //public static T GetFromCallContext<T>(ContextKey key)
-        //{
-        //    return (T)CallContext.GetData(key.Description());
-        //}
+        public static T GetFromCallContext<T>(ContextKey key)
+        {
+            return (T)CallContext.GetData(key.Description());
+        }
 
         /// <summary>
         /// 设置对象到请求唯一缓存
         /// </summary>
         /// <param name="key"></param>
         /// <param name="theObject"></param>
-        //public static void SetToCallContext(ContextKey key, object theObject)
-        //{
-        //    CallContext.SetData(key.Description(), theObject);
-        //}
+        public static void SetToCallContext(ContextKey key, object theObject)
+        {
+            CallContext.SetData(key.Description(), theObject);
+        }
 
 
         #endregion
