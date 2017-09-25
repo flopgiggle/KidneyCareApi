@@ -565,10 +565,13 @@ namespace KidneyCareApi.Dto
         public string UserType { get; set; }
         public string OpenId { get; set; }
         public string Duty { get; set; }
+        public string CityCode { get; set; }
+        public string ProvinceCode { get; set; }
         public int JobTitle { get; set; }
         public double? Height { get; set; }
         public string Profile { get; set; }
         public bool IsRead{ get; set; }
+        public int? BelongToHospital { get; set; }
         public Patient Patient { get; set; }
         public Doctor Doctor { get; set; }
         public Nurse Nurse { get; set; }

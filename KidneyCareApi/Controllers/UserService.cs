@@ -131,13 +131,14 @@ namespace KidneyCareApi.Controllers
             returnUserInfo.UserType = user.UserType.ToString();
             returnUserInfo.Status = user.Status.ToString();
             returnUserInfo.Profile = user.Profile;
-
+            
             //判定为医生还是护士
             if ((int)UserType.Doctor == int.Parse(user.UserType.ToString()))
             {
                 var doctor = db.Users.First(a => a.OpenId == paramsDto.OpenId).Doctors.FirstOrDefault();
                 Dal.Doctor returnDoctor = new Doctor();
                 returnDoctor.BelongToHospital = doctor.BelongToHospital;
+                returnUserInfo.BelongToHospital = doctor.BelongToHospital;
                 returnUserInfo.Doctor = returnDoctor;
                 returnUserInfo.JobTitle = doctor.JobTitle ?? 1;
             }
@@ -147,10 +148,18 @@ namespace KidneyCareApi.Controllers
                 var nurse = db.Users.First(a => a.OpenId == paramsDto.OpenId).Nurses.FirstOrDefault();
                 Dal.Nurse returnNurse = new Nurse();
                 returnNurse.BelongToHospital = nurse.BelongToHospital;
+                returnUserInfo.BelongToHospital = nurse.BelongToHospital;
                 returnUserInfo.Nurse = returnNurse;
                 returnUserInfo.JobTitle = nurse.JobTitle ?? 1;
             }
 
+            if (returnUserInfo.BelongToHospital != null)
+            {
+                returnUserInfo.CityCode = db.Hospitals.Where(a => a.Id == returnUserInfo.BelongToHospital).Select(a => a.CityCode).First();
+                returnUserInfo.ProvinceCode = db.Cities.Where(a => a.CityCode == returnUserInfo.CityCode)
+                    .Select(a => a.ProvinceCode).First();
+            }
+            
             return Util.ReturnOkResult(returnUserInfo);
         }
 
@@ -238,6 +247,7 @@ namespace KidneyCareApi.Controllers
             returnUserInfo.Patient = returnPatient;
             returnUserInfo.Patient.BelongToDoctor = patient.BelongToDoctor;
             returnUserInfo.Patient.BelongToHospital = patient.BelongToHospital;
+            returnUserInfo.BelongToHospital = patient.BelongToHospital;
             returnUserInfo.Patient.BelongToNurse = patient.BelongToNurse;
             returnUserInfo.Patient.BindStatus = patient.BindStatus;
             returnUserInfo.Patient.CKDLeave = patient.CKDLeave;
@@ -265,6 +275,13 @@ namespace KidneyCareApi.Controllers
             //查询是否有未读消息
             returnUserInfo.IsRead = !db.Messages.Any(a => a.IsRead == false && a.ToUser == user.Id);
             returnUserInfo.Disease = disease;
+            if (returnUserInfo.BelongToHospital != null)
+            {
+                returnUserInfo.CityCode = db.Hospitals.Where(a => a.Id == returnUserInfo.BelongToHospital).Select(a => a.CityCode).First();
+                returnUserInfo.ProvinceCode = db.Cities.Where(a => a.CityCode == returnUserInfo.CityCode)
+                    .Select(a => a.ProvinceCode).First();
+            }
+
             return Util.ReturnOkResult(returnUserInfo);
 
 
