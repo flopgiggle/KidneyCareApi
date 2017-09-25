@@ -334,19 +334,25 @@ namespace KidneyCareApi.Controllers
 
             //获取病人并且设置病人信息
             var patient = db.Users.First(a => a.OpenId == dto.OpenId).Patients.First();
-            var doctor = db.Doctors.First(a => a.Id == dto.BelongToDoctor);
-            var nurse = db.Nurses.First(a => a.Id == dto.BelongToNurse);
+            if (dto.BelongToDoctor != -1)
+            {
+                var doctor = db.Doctors.First(a => a.Id == dto.BelongToDoctor);
+                patient.Doctor = doctor;
+            }
+            if (dto.BelongToNurse != -1)
+            {
+                var nurse = db.Nurses.First(a => a.Id == dto.BelongToNurse);
+                patient.Nurse = nurse;
+            }
+
             var hospital = db.Hospitals.First(a => a.Id == dto.BelongToHospital);
             patient.User = user;
             //patient.CKDLeave = int.Parse(dto.CKDLeave);
             //patient.DiseaseType = int.Parse(dto.DiseaseType);
             patient.Hospital = hospital;
-            patient.Doctor = doctor;
-            patient.Nurse = nurse;
-            patient.BindStatus = (hospital == null ? "0" : "1") + (doctor == null ? "0" : "1") +
-                                 (nurse == null ? "0" : "1");
+            patient.BindStatus = (hospital == null ? "0" : "1") + (patient.Doctor == null ? "0" : "1") +
+                                 (patient.Nurse == null ? "0" : "1");
             patient.CreateTime = DateTime.Now;
-
 
             db.SaveChanges();
 
