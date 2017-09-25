@@ -96,7 +96,7 @@ namespace KidneyCareApi.Controllers
             //HttpClient http = new HttpClient();
             if (string.IsNullOrEmpty(paramsDto.OpenId))
             {
-                paramsDto.OpenId = GetOpenIdByCode(paramsDto.Code, "wx494a66b63b939c3e", "9d221b1b89a5d840f95332afdeb1a3f3");
+                paramsDto.OpenId = GetOpenIdByCode(paramsDto.Code, Util.GetConfigByName("AppIdForMedical"), Util.GetConfigByName("AppSecretForMedical"));
             };
 
             if (string.IsNullOrEmpty(paramsDto.OpenId))
@@ -189,7 +189,7 @@ namespace KidneyCareApi.Controllers
             //HttpClient http = new HttpClient();
             if (string.IsNullOrEmpty(paramsDto.OpenId))
             {
-                paramsDto.OpenId = GetOpenIdByCode(paramsDto.Code, "wx941fffa48c073a0d", "1b71efd31775ec025045185b951e0296");
+                paramsDto.OpenId = GetOpenIdByCode(paramsDto.Code, Util.GetConfigByName("AppIdForDisease"), Util.GetConfigByName("AppSecretForDisease"));
             };
 
             if (string.IsNullOrEmpty(paramsDto.OpenId))
