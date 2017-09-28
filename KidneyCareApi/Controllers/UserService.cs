@@ -658,7 +658,7 @@ namespace KidneyCareApi.Controllers
         {
             Db db = new Db();
             var provinces = db.Provinces.Where(a => a.ProvinceName == "四川省").Select(a => new { Name = a.ProvinceName, Id = a.ProvinceCode }).ToList();
-            var citys = db.Cities.Where(a => (a.CityName == "成都市" || a.CityName == "绵阳市" || a.CityName == "广元市" || a.CityName== "资阳市") && a.ProvinceCode == province).Select(a => new { Name = a.CityName, Id = a.CityCode }).ToList();
+            var citys = db.Cities.Where(a => (a.CityName == "成都市" || a.CityName == "绵阳市" || a.CityName == "广元市" || a.CityName== "资阳市" || a.CityName == "眉山市") && a.ProvinceCode == province).Select(a => new { Name = a.CityName, Id = a.CityCode }).ToList();
             var hospital = db.Hospitals.Where(a => a.CityCode == city).Select(a => new { Name = a.Name, Id = a.Id }).ToList();
             return Util.ReturnOkResult(JsonConvert.SerializeObject(new { provinces, citys, hospital }));
         }
