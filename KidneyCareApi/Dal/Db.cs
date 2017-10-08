@@ -17,6 +17,7 @@ namespace KidneyCareApi.Dal
         public virtual DbSet<City> Cities { get; set; }
         public virtual DbSet<DataType> DataTypes { get; set; }
         public virtual DbSet<Doctor> Doctors { get; set; }
+        public virtual DbSet<Drug> Drugs { get; set; }
         public virtual DbSet<Feedback> Feedbacks { get; set; }
         public virtual DbSet<Hospital> Hospitals { get; set; }
         public virtual DbSet<IndicatorsRange> IndicatorsRanges { get; set; }
@@ -26,6 +27,7 @@ namespace KidneyCareApi.Dal
         public virtual DbSet<PatientsCourse> PatientsCourses { get; set; }
         public virtual DbSet<PatientsData> PatientsDatas { get; set; }
         public virtual DbSet<PatientsDisease> PatientsDiseases { get; set; }
+        public virtual DbSet<PatientsDrug> PatientsDrugs { get; set; }
         public virtual DbSet<Province> Provinces { get; set; }
         public virtual DbSet<Report> Reports { get; set; }
         public virtual DbSet<User> Users { get; set; }
@@ -77,6 +79,26 @@ namespace KidneyCareApi.Dal
                 .HasMany(e => e.Patients)
                 .WithOptional(e => e.Doctor)
                 .HasForeignKey(e => e.BelongToDoctor);
+
+            modelBuilder.Entity<Drug>()
+                .Property(e => e.DrugGroup)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Drug>()
+                .Property(e => e.DrugGroupTwo)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Drug>()
+                .Property(e => e.DrugGroupTwoLogogram)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Drug>()
+                .Property(e => e.DrugName)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Drug>()
+                .Property(e => e.DrugCode)
+                .IsUnicode(false);
 
             modelBuilder.Entity<Feedback>()
                 .Property(e => e.Message)
@@ -239,6 +261,18 @@ namespace KidneyCareApi.Dal
                 .Property(e => e.DiseaseStartTime)
                 .IsUnicode(false);
 
+            modelBuilder.Entity<PatientsDrug>()
+                .Property(e => e.DrugCode)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<PatientsDrug>()
+                .Property(e => e.DrugName)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<PatientsDrug>()
+                .Property(e => e.Remark)
+                .IsUnicode(false);
+
             modelBuilder.Entity<Province>()
                 .Property(e => e.ProvinceCode)
                 .IsUnicode(false);
@@ -325,6 +359,10 @@ namespace KidneyCareApi.Dal
 
             modelBuilder.Entity<User>()
                 .Property(e => e.Profile)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<User>()
+                .Property(e => e.WxAvatarUrl)
                 .IsUnicode(false);
 
             modelBuilder.Entity<User>()

@@ -35,8 +35,6 @@ namespace KidneyCareApi.Dal
 
         public int? BelongToHospital { get; set; }
 
-        public double? Height { get; set; }
-
         [StringLength(5)]
         public string Sex { get; set; }
 
@@ -52,13 +50,15 @@ namespace KidneyCareApi.Dal
         [StringLength(255)]
         public string OpenId { get; set; }
 
-        [StringLength(500)]
-        public string WxAvatarUrl { get; set; }
-        
         public int? Status { get; set; }
+
+        public double? Height { get; set; }
 
         [StringLength(2000)]
         public string Profile { get; set; }
+
+        [StringLength(500)]
+        public string WxAvatarUrl { get; set; }
 
         public DateTime? CreateTime { get; set; }
 

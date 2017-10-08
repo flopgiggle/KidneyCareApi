@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Web.Http;
+using KidneyCareApi.Common;
 
 namespace KidneyCareApi
 {
@@ -19,6 +20,9 @@ namespace KidneyCareApi
                 routeTemplate: "api/{controller}/{id}",
                 defaults: new { id = RouteParameter.Optional }
             );
+
+            //注册授权认证配置
+            config.Filters.Add(new AuthorizerFilterAttribute());
         }
     }
 }

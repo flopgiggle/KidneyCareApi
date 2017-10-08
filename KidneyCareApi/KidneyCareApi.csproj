@@ -220,15 +220,18 @@
     <Compile Include="Areas\HelpPage\XmlDocumentationProvider.cs" />
     <Compile Include="BLL\PatientInfo.cs" />
     <Compile Include="Common\APIExceptionFilterAttribute .cs" />
+    <Compile Include="Common\AuthorizerFilterAttribute.cs" />
     <Compile Include="Common\AutoMapperHelper.cs" />
     <Compile Include="Common\BusinessException.cs" />
     <Compile Include="Common\HttpHelper.cs" />
     <Compile Include="Common\ICacheHelper.cs" />
     <Compile Include="Common\KeyGroup.cs" />
+    <Compile Include="Common\OpenApiAttribute.cs" />
     <Compile Include="Common\QueueProcess.cs" />
     <Compile Include="Common\RedisCacheHelper.cs" />
     <Compile Include="Common\SSOManager.cs" />
     <Compile Include="Common\Util.cs" />
+    <Compile Include="Controllers\Drugs.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\Record.cs" />
     <Compile Include="Controllers\Message.cs" />
@@ -240,6 +243,7 @@
     <Compile Include="Dal\DataType.cs" />
     <Compile Include="Dal\Db.cs" />
     <Compile Include="Dal\Doctor.cs" />
+    <Compile Include="Dal\Drug.cs" />
     <Compile Include="Dal\Feedback.cs" />
     <Compile Include="Dal\Hospital.cs" />
     <Compile Include="Dal\IndicatorsRange.cs" />
@@ -249,10 +253,12 @@
     <Compile Include="Dal\PatientsCourse.cs" />
     <Compile Include="Dal\PatientsData.cs" />
     <Compile Include="Dal\PatientsDisease.cs" />
+    <Compile Include="Dal\PatientsDrug.cs" />
     <Compile Include="Dal\Province.cs" />
     <Compile Include="Dal\Report.cs" />
     <Compile Include="Dal\User.cs" />
     <Compile Include="Dal\ZipCode.cs" />
+    <Compile Include="Dto\DrugsDto.cs" />
     <Compile Include="Dto\Dto.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
