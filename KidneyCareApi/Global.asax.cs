@@ -27,6 +27,7 @@ namespace KidneyCareApi
             QueueProcess.LogInfoQueueProcess();
             Mapper.Initialize(cfg => {
                 cfg.CreateMap<Dal.PatientsData, CurrentInfoListDto>();
+                cfg.CreateMap<Drugs, Dal.PatientsDrug>();
             });
         }
     }

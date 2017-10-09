@@ -65,6 +65,33 @@ namespace KidneyCareApi.Controllers
             return Util.ReturnOkResult(JsonConvert.SerializeObject(DrugsGroup));
         }
 
+        [HttpPost]
+        [Route("savePatientDrugs")]
+        public ResultPakage<bool> SavePatientDrugs(List<PatientsDrug> drugs)
+        {
+            Db db = new Db();
+            //var dbDrugs = drugs.MapToList<PatientsDrug>();
+            var patientId = drugs[0].PatientId;
+            string batchNum = Guid.NewGuid().ToString();
+            var dateTime = DateTime.Now;
+            //历史用药设置为非激活状态
+            db.PatientsDrugs.Where(a=>a.PatientId == patientId && a.IsActive == true).ForEach(a=>
+                {
+                    a.IsActive = false;
+                    a.UpdateTime = dateTime;
+                });
+            //写入新的用药信息
+            drugs.ForEach(a =>
+            {
+                a.CreateTime = dateTime;
+                a.IsActive = true;
+                a.RecordBatch = batchNum;
+            });
+            db.PatientsDrugs.AddRange(drugs);
+            db.SaveChanges();
+            return Util.ReturnOkResult(true);
+        }
+
 
     }
 }

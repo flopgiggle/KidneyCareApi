@@ -171,7 +171,8 @@ namespace KidneyCareApi.Controllers
             var disease = db.PatientsDiseases.Where(a => a.PatientId == patientId).Select(a => new { a.PatientId, a.DiseaseName, a.DiseaseType, a.DiseaseCode }).ToList();
             var course = db.PatientsCourses.Where(a => a.PaitentId == patientId).Select(a => new { a.PaitentId, a.CoursCode, a.CoursName }).ToList();
             var patientBaseInfo = db.Patients.Where(a => a.Id == patientId).Select(a => new { a.CKDLeave, a.User.UserName, a.User.Birthday, a.User.Sex, a.User.WxAvatarUrl }).FirstOrDefault();
-            var returnObj = new { disease, course, patientBaseInfo };
+            var drugs = db.PatientsDrugs.Where(a => a.PatientId == patientId && a.IsActive == true).Select(a => new {a.DrugCode,a.DrugName, Remark = a.Remark??""}).ToList();
+            var returnObj = new { disease, course, patientBaseInfo, drugs };
             return Util.ReturnOkResult(JsonConvert.SerializeObject(returnObj));
         }
 
