@@ -50,5 +50,6 @@ namespace KidneyCareApi.Dto
     {
         public string RecordTime { get; set; }
         public string Drugs { get; set; }
+        public DateTime? CreateTime { get; set; }
     }
 }

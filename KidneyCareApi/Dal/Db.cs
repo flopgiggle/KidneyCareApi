@@ -8,7 +8,7 @@ namespace KidneyCareApi.Dal
     public partial class Db : DbContext
     {
         public Db()
-            : base("name=Db")
+            : base("name=Db13")
         {
         }
 

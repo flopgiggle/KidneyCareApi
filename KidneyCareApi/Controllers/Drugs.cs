@@ -130,7 +130,7 @@ namespace KidneyCareApi.Controllers
         public ResultPakage<List<PatientDrugsHistory>> GetHistoryDrugs(int patientId)
         {
             Db db = new Db();
-            var drugsGroup =  db.PatientsDrugs.Where(a => a.PatientId == patientId).OrderByDescending(a => a.RecordTime).Select(a=>new {a.PatientId,a.RecordBatch,a.RecordTime,a.DrugCode,a.DrugName,a.Remark})
+            var drugsGroup =  db.PatientsDrugs.Where(a => a.PatientId == patientId).OrderByDescending(a => a.RecordTime).Select(a=>new {a.PatientId,a.RecordBatch,a.RecordTime,a.DrugCode,a.DrugName,a.Remark,a.CreateTime})
                 .GroupBy(a => new {a.RecordBatch,a.RecordTime}).OrderByDescending(a=>a.Key.RecordTime);
             List<PatientDrugsHistory> returnList = new List<PatientDrugsHistory>();
             
@@ -141,12 +141,13 @@ namespace KidneyCareApi.Controllers
                 a.ForEach(b =>
                 {
                     hisoty.Drugs += b.DrugName + " " + b.Remark + ";";
+                    hisoty.CreateTime = b.CreateTime;
                 });
-
+                
                 returnList.Add(hisoty);
             });
-
-            return Util.ReturnOkResult(returnList);
+            var list = returnList.OrderByDescending(a => a.RecordTime).ThenByDescending(a=>a.CreateTime).ToList();
+            return Util.ReturnOkResult(list);
         }
 
 
