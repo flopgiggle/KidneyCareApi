@@ -25,6 +25,8 @@ namespace KidneyCareApi.Dal
         [StringLength(255)]
         public string RecordBatch { get; set; }
 
+        public DateTime? RecordTime { get; set; }
+
         public bool? IsActive { get; set; }
 
         public DateTime? CreateTime { get; set; }

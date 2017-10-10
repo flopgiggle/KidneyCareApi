@@ -53,7 +53,7 @@ namespace KidneyCareApi.Controllers
                     //遍历二级分类下的每一种药物，并设置Dto到二级分类中
                     allDrugs.Where(b =>b.DrugGroup==a.Key && b.DrugGroupTwo == c.Key.DrugGroupTwo).ForEach(d =>
                     {
-                        dgt.DrugsList.Add(new Drugs(){DrugCode = d.DrugCode,DrugsName = d.DrugName});
+                        dgt.DrugsList.Add(new Drugs(){DrugCode = d.DrugCode,DrugName = d.DrugName});
                     });
                     group.GroupTowList.Add(dgt);
                 });
@@ -67,29 +67,86 @@ namespace KidneyCareApi.Controllers
 
         [HttpPost]
         [Route("savePatientDrugs")]
-        public ResultPakage<bool> SavePatientDrugs(List<PatientsDrug> drugs)
+        public ResultPakage<bool> SavePatientDrugs(RecordPatientDrugs recordPatientDrugs)
         {
             Db db = new Db();
             //var dbDrugs = drugs.MapToList<PatientsDrug>();
-            var patientId = drugs[0].PatientId;
+            var drugs = recordPatientDrugs.Drugs;
+            var patientId = recordPatientDrugs.PatientId;
+            var currentRecordTime = recordPatientDrugs.RecordTime;
             string batchNum = Guid.NewGuid().ToString();
             var dateTime = DateTime.Now;
-            //历史用药设置为非激活状态
-            db.PatientsDrugs.Where(a=>a.PatientId == patientId && a.IsActive == true).ForEach(a=>
+            //判定是否有任何记录
+            bool noAnyRecord = !db.PatientsDrugs.Any(a => a.PatientId == patientId);
+            //判定当前日期是否是最新的用药记录，如果当前日期为最新用药记录，则把之前的用药全部设置为非激活状态
+            bool currentIsNew = db.PatientsDrugs.Any(a => a.PatientId == patientId && a.IsActive == true && a.RecordTime <= currentRecordTime) || noAnyRecord;
+
+
+            //如果没有新的记录写入，则直接设置以前的所有记录为非激活状态，并且返回
+            if (recordPatientDrugs.Drugs==null || recordPatientDrugs.Drugs.Count == 0)
+            {
+                //如果没有写入记录，而且为历史用药，则不必写入数据库，表明什么都没操作
+                if (currentIsNew)
+                {
+                    //历史用药设置为非激活状态
+                    db.PatientsDrugs.Where(a => a.PatientId == patientId && a.IsActive == true).ForEach(a =>
+                    {
+                        a.IsActive = false;
+                        a.UpdateTime = dateTime;
+                    });
+                    db.SaveChanges();
+                    return Util.ReturnOkResult(true);
+                }
+                else
+                {
+                    return Util.ReturnOkResult(true);
+                }
+            }
+
+            if (currentIsNew)
+            {
+                //历史用药设置为非激活状态
+                db.PatientsDrugs.Where(a => a.PatientId == patientId && a.IsActive == true).ForEach(a =>
                 {
                     a.IsActive = false;
                     a.UpdateTime = dateTime;
                 });
+            }
+
             //写入新的用药信息
             drugs.ForEach(a =>
             {
                 a.CreateTime = dateTime;
-                a.IsActive = true;
+                a.IsActive = currentIsNew;
                 a.RecordBatch = batchNum;
             });
             db.PatientsDrugs.AddRange(drugs);
             db.SaveChanges();
             return Util.ReturnOkResult(true);
+        }
+
+        [HttpGet]
+        [Route("getHistoryDrugs/{patientId}")]
+        public ResultPakage<List<PatientDrugsHistory>> GetHistoryDrugs(int patientId)
+        {
+            Db db = new Db();
+            var drugsGroup =  db.PatientsDrugs.Where(a => a.PatientId == patientId).OrderByDescending(a => a.RecordTime).Select(a=>new {a.PatientId,a.RecordBatch,a.RecordTime,a.DrugCode,a.DrugName,a.Remark})
+                .GroupBy(a => new {a.RecordBatch,a.RecordTime}).OrderByDescending(a=>a.Key.RecordTime);
+            List<PatientDrugsHistory> returnList = new List<PatientDrugsHistory>();
+            
+            drugsGroup.ForEach(a =>
+            {
+                PatientDrugsHistory hisoty = new PatientDrugsHistory();
+                hisoty.RecordTime = (a.Key.RecordTime??DateTime.Now).ToString("yyyy-MM-dd");
+                a.ForEach(b =>
+                {
+                    hisoty.Drugs += b.DrugName + " " + b.Remark + ";";
+                });
+
+                returnList.Add(hisoty);
+            });
+
+            return Util.ReturnOkResult(returnList);
         }
 
 

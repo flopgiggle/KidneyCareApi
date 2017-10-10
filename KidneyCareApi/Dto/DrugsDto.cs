@@ -34,8 +34,21 @@ namespace KidneyCareApi.Dto
     {
         public int Id { get; set; }
         public string DrugCode { get; set; }
-        public string DrugsName { get; set; }
+        public string DrugName { get; set; }
         public string Remark { get; set; }
         public int PatientId { get; set; }
+    }
+
+    public class RecordPatientDrugs
+    {
+        public DateTime RecordTime { get; set; }
+        public List<PatientsDrug> Drugs { get; set; }
+        public int PatientId { get; set; }
+    }
+
+    public class PatientDrugsHistory
+    {
+        public string RecordTime { get; set; }
+        public string Drugs { get; set; }
     }
 }
