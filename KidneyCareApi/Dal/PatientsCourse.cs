@@ -21,6 +21,8 @@ namespace KidneyCareApi.Dal
 
         public int? CoursStatus { get; set; }
 
+        public int? CourseId { get; set; }
+
         [StringLength(255)]
         public string AttendingDates { get; set; }
 

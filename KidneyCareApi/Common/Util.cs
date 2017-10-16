@@ -20,6 +20,7 @@ using AutoMapper;
 //using Gma.QrCodeNet.Encoding;
 //using Gma.QrCodeNet.Encoding.Windows.Render;
 using Newtonsoft.Json;
+using System.Web;
 //using Quartz;
 //using Quartz.Impl;
 //using Quartz.Impl.Triggers;
@@ -532,6 +533,22 @@ namespace KidneyCareApi.Common
             return ret;
 
         }
+
+        public static string SaveImage(string imagePath,HttpContext context) {
+            HttpPostedFile file = context.Request.Files.Count > 0 ? context.Request.Files[0] : null;
+            string uploadPath = context.Server.MapPath(GetConfigByName(imagePath) + "\\");
+            string randomNumber = Guid.NewGuid().ToString();
+            var fileName = randomNumber + file.FileName;
+            //判断上传的文件是否为空
+            if (!Directory.Exists(uploadPath))
+            {
+                Directory.CreateDirectory(uploadPath);
+            }
+            //保存文件
+            file.SaveAs(uploadPath + fileName);
+            return fileName;
+        }
+
 
         private static readonly HashSet<char> base64Characters = new HashSet<char>()
         {

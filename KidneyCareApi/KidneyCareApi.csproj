@@ -25,6 +25,7 @@
     <UseGlobalApplicationHostFile />
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
+    <Use64BitIISExpress />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -231,6 +232,7 @@
     <Compile Include="Common\RedisCacheHelper.cs" />
     <Compile Include="Common\SSOManager.cs" />
     <Compile Include="Common\Util.cs" />
+    <Compile Include="Controllers\Course.cs" />
     <Compile Include="Controllers\Drugs.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\Record.cs" />
@@ -240,6 +242,8 @@
     <Compile Include="Dal\Area.cs" />
     <Compile Include="Dal\AuthenCode.cs" />
     <Compile Include="Dal\City.cs" />
+    <Compile Include="Dal\Course.cs" />
+    <Compile Include="Dal\CourseTakeIn.cs" />
     <Compile Include="Dal\DataType.cs" />
     <Compile Include="Dal\Db.cs" />
     <Compile Include="Dal\Doctor.cs" />
@@ -258,6 +262,7 @@
     <Compile Include="Dal\Report.cs" />
     <Compile Include="Dal\User.cs" />
     <Compile Include="Dal\ZipCode.cs" />
+    <Compile Include="Dto\CourseDto.cs" />
     <Compile Include="Dto\DrugsDto.cs" />
     <Compile Include="Dto\Dto.cs" />
     <Compile Include="Global.asax.cs">
@@ -268,6 +273,9 @@
       <AutoGen>True</AutoGen>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>Settings.settings</DependentUpon>
+    </Compile>
+    <Compile Include="UploadImage.ashx.cs">
+      <DependentUpon>UploadImage.ashx</DependentUpon>
     </Compile>
     <Compile Include="UploadHandler.ashx.cs">
       <DependentUpon>UploadHandler.ashx</DependentUpon>
@@ -332,6 +340,7 @@
     <Content Include="Views\Shared\Error.cshtml" />
     <Content Include="Views\Shared\_Layout.cshtml" />
     <Content Include="UploadHandler.ashx" />
+    <Content Include="UploadImage.ashx" />
     <None Include="Web.Test.config">
       <DependentUpon>Web.config</DependentUpon>
       <SubType>Designer</SubType>

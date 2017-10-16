@@ -8,13 +8,15 @@ namespace KidneyCareApi.Dal
     public partial class Db : DbContext
     {
         public Db()
-            : base("name=Db13")
+            : base("name=Db")
         {
         }
 
         public virtual DbSet<Area> Areas { get; set; }
         public virtual DbSet<AuthenCode> AuthenCodes { get; set; }
         public virtual DbSet<City> Cities { get; set; }
+        public virtual DbSet<Course> Courses { get; set; }
+        public virtual DbSet<CourseTakeIn> CourseTakeIns { get; set; }
         public virtual DbSet<DataType> DataTypes { get; set; }
         public virtual DbSet<Doctor> Doctors { get; set; }
         public virtual DbSet<Drug> Drugs { get; set; }
@@ -65,6 +67,42 @@ namespace KidneyCareApi.Dal
 
             modelBuilder.Entity<City>()
                 .Property(e => e.ProvinceCode)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Course>()
+                .Property(e => e.CourseName)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Course>()
+                .Property(e => e.Address)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Course>()
+                .Property(e => e.Date)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Course>()
+                .Property(e => e.Speaker)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Course>()
+                .Property(e => e.SpeakerId)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Course>()
+                .Property(e => e.SpeakerInfo)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Course>()
+                .Property(e => e.CourseContent)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Course>()
+                .Property(e => e.PicUrl)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Course>()
+                .Property(e => e.PPTUrl)
                 .IsUnicode(false);
 
             modelBuilder.Entity<DataType>()
@@ -368,6 +406,11 @@ namespace KidneyCareApi.Dal
             modelBuilder.Entity<User>()
                 .Property(e => e.WxAvatarUrl)
                 .IsUnicode(false);
+
+            modelBuilder.Entity<User>()
+                .HasMany(e => e.Courses)
+                .WithOptional(e => e.User)
+                .HasForeignKey(e => e.CreatePerson);
 
             modelBuilder.Entity<User>()
                 .HasMany(e => e.Messages)

@@ -12,6 +12,8 @@ namespace KidneyCareApi.Dal
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
         public User()
         {
+            Courses = new HashSet<Course>();
+            CourseTakeIns = new HashSet<CourseTakeIn>();
             Doctors = new HashSet<Doctor>();
             Feedbacks = new HashSet<Feedback>();
             Messages = new HashSet<Message>();
@@ -67,6 +69,12 @@ namespace KidneyCareApi.Dal
         public DateTime? CreatePerson { get; set; }
 
         public DateTime? UpdatePerson { get; set; }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<Course> Courses { get; set; }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<CourseTakeIn> CourseTakeIns { get; set; }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Doctor> Doctors { get; set; }

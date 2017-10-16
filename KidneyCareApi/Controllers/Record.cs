@@ -1,4 +1,15 @@
-﻿using System;
+﻿/**
+* 命名空间: KidneyCareApi.Controllers
+*
+* 功 能： 记录模块
+* 类 名： UserInfoController
+*
+* Ver 变更日期 负责人 变更内容
+* ───────────────────────────────────
+* V1.0.0.0 20170801 李闻海 初版
+*
+*/
+using System;
 using System.Collections;
 using KidneyCareApi.Common;
 using System.Collections.Generic;
