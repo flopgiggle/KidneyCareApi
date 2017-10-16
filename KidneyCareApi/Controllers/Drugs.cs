@@ -88,7 +88,7 @@ namespace KidneyCareApi.Controllers
             string batchNum = Guid.NewGuid().ToString();
             var dateTime = DateTime.Now;
             //判定是否有任何记录
-            bool noAnyRecord = !db.PatientsDrugs.Any(a => a.PatientId == patientId);
+            bool noAnyRecord = !db.PatientsDrugs.Any(a => a.PatientId == patientId && a.IsActive == true);
             //判定当前日期是否是最新的用药记录，如果当前日期为最新用药记录，则把之前的用药全部设置为非激活状态
             bool currentIsNew = db.PatientsDrugs.Any(a => a.PatientId == patientId && a.IsActive == true && a.RecordTime <= currentRecordTime) || noAnyRecord;
 
@@ -151,7 +151,7 @@ namespace KidneyCareApi.Controllers
                 hisoty.RecordTime = (a.Key.RecordTime??DateTime.Now).ToString("yyyy-MM-dd");
                 a.ForEach(b =>
                 {
-                    hisoty.Drugs += b.DrugName + " " + b.Remark + ";";
+                    hisoty.Drugs += b.DrugName + " " + b.Remark + " ;";
                     hisoty.CreateTime = b.CreateTime;
                 });
                 
