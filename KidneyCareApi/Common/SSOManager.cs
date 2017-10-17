@@ -88,6 +88,19 @@ namespace KidneyCareApi.Common
             }
         }
 
+        public static SSOUserInfo GetUserInfoFromHeader() {
+            SSOUserInfo user = new SSOUserInfo();
+            if (HttpContext.Current != null)
+            {
+                var headers = HttpContext.Current.Request.Headers;
+                if (headers["userId"] != null) {
+                    user.Id = int.Parse(headers["userId"]);
+                }
+                
+            }
+            return user;
+        }
+
         /// <summary>
         /// 获取用户信息
         /// </summary>

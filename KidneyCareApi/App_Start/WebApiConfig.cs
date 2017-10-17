@@ -23,6 +23,9 @@ namespace KidneyCareApi
 
             //注册授权认证配置
             config.Filters.Add(new AuthorizerFilterAttribute());
+
+
+            //config.Formatters.Insert(0, new System.Net.Http.Formatting.XmlMediaTypeFormatter());
         }
     }
 }

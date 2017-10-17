@@ -45,6 +45,12 @@ namespace KidneyCareApi.Controllers
         public ResultPakage<bool> CreateCourse(Dal.Course course)
         {
             Db db = new Db();
+            //var imageName = Util.SaveImage("UploadCourseImagePath", HttpContext.Current);
+            //if (imageName != null && imageName.Length > 0) {
+            //    course.PicUrl = imageName;
+            //}
+            var user = SSOManager.GetUserInfoFromHeader();
+            course.CreatePerson = user.Id;
             course.CreateTime = DateTime.Now;
             db.Courses.Add(course);
             db.SaveChanges();
@@ -52,14 +58,44 @@ namespace KidneyCareApi.Controllers
         }
 
         [HttpPost]
-        [Route("uploadImage")]
-        public ResultPakage<bool> uploadImage(Dal.Course course)
+        [Route("getCourseList")]
+        public ResultPakage<bool> getCourseList(Dal.Course course)
         {
             Db db = new Db();
-            var imageName = Util.SaveImage("UploadCourseImagePath", HttpContext.Current);
-
+            //var imageName = Util.SaveImage("UploadCourseImagePath", HttpContext.Current);
+            //if (imageName != null && imageName.Length > 0) {
+            //    course.PicUrl = imageName;
+            //}
             course.CreateTime = DateTime.Now;
             db.Courses.Add(course);
+            db.SaveChanges();
+            return Util.ReturnOkResult(true);
+        }
+
+        [HttpPost]
+        [Route("uploadPic")]
+        public ResultPakage<bool> UploadImage(Dal.Course courseDto)
+        {
+            Db db = new Db();
+            var coruse = db.Courses.Where(a => a.Id == courseDto.Id).First();
+            var imageName = Util.SaveImage("UploadCourseImagePath", HttpContext.Current);
+            coruse.PicUrl = imageName;
+            db.SaveChanges();
+            return Util.ReturnOkResult(true);
+        }
+
+        [HttpPost]
+        [Route("uploadPPT")]
+        public ResultPakage<bool> UploadPPT(Dal.Course courseDto)
+        {
+            var imageName = Util.SaveImage("UploadCoursePPTPath", HttpContext.Current);
+            if (imageName == null) {
+                return Util.ReturnOkResult(false);
+            }
+
+            Db db = new Db();
+            var coruse = db.Courses.Where(a => a.Id == courseDto.Id).First();
+            coruse.PPTUrl = imageName;
             db.SaveChanges();
             return Util.ReturnOkResult(true);
         }

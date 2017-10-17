@@ -100,6 +100,8 @@ namespace KidneyCareApi.Common
             }
         }
 
+
+
         /// <summary>
         ///     生成系统日志。
         /// </summary>
@@ -536,6 +538,9 @@ namespace KidneyCareApi.Common
 
         public static string SaveImage(string imagePath,HttpContext context) {
             HttpPostedFile file = context.Request.Files.Count > 0 ? context.Request.Files[0] : null;
+            if (file == null) {
+                return null;
+            }
             string uploadPath = context.Server.MapPath(GetConfigByName(imagePath) + "\\");
             string randomNumber = Guid.NewGuid().ToString();
             var fileName = randomNumber + file.FileName;
